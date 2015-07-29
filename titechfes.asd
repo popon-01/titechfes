@@ -11,6 +11,7 @@
 	       (:file "loadfile")
 	       (:file "key")
 	       (:file "gameobject")
+	       (:file "player")
                (:file "titechfes"))
   :depends-on (:lispbuilder-sdl :split-sequence))
 
