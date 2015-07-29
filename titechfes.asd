@@ -8,6 +8,7 @@
   :components ((:file "package")
 	       (:file "macro")
 	       (:file "global")
+	       (:file "loadfile")
 	       (:file "key")
 	       (:file "gameobject")
                (:file "titechfes"))
