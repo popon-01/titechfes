@@ -8,10 +8,12 @@
   :components ((:file "package")
 	       (:file "macro")
 	       (:file "global")
+	       (:file "load-image")
 	       (:file "loadfile")
 	       (:file "key")
 	       (:file "gameobject")
 	       (:file "player")
+	       (:file "map")
                (:file "titechfes"))
-  :depends-on (:lispbuilder-sdl :split-sequence))
+  :depends-on (:lispbuilder-sdl :split-sequence :iterate))
 
