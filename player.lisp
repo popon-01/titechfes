@@ -7,10 +7,14 @@
   (width 24)
   (height 32)
   (image (error "image not initialized"))
-  (vx 3)
-  (vy 5)
+  (vx 0)
+  (vy 0)
   (jump-ok nil)
-  (jump-accel 0))
+  (jump-accel 0)
+  (jump-cool 0)
+  (dash-ok nil)
+  (dash-aceel 0)
+  (dash-cool 0))
 
 (defun get-map-state (x y)
   (if (and (<= 0 x)
@@ -22,16 +26,26 @@
 
 (defmethod update-object ((p player))
   (with-slots (x y width height vx vy 
-		 jump-ok jump-accel) p
-    (with-slots (right left jump down shot) *keystate*
+		 jump-ok jump-accel jump-cool
+		 dash-ok dash-aceel dash-cool) p
+    (with-slots (right left jump down shot dash) *keystate*
       (let ((nx x) (ny y))
+	(setf vx 0)
 	(whens
-	  ((and jump jump-ok)
-	   (setf jump-ok nil) (setf jump-accel 10)))
+	  (left (decf vx 5))
+	  (right (incf vx 5))
+	  ((and jump jump-ok (zerop jump-cool))
+	   (setf jump-ok nil) (setf jump-accel 10))
+	  ((and dash dash-ok (zerop dash-cool))
+	   (setf dash-ok nil) (setf dash-aceel 10)))
 	(incf vy 2)
 	(when (> vy 10) (setf vy 10))
 	(when (< 0 jump-accel) (setf vy -8))
-	(decf jump-accel 1)
+	(decf jump-accel)
+	(whens
+	  ((> dash-aceel 0) (decf dash-aceel))
+	  ((> jump-cool 0) (decf jump-cool))
+	  ((> dash-cool 0) (decf dash-cool)))
 	(incf ny vy)
 	(whens 
 	 ;;up
@@ -46,17 +60,20 @@
 	  (setf ny (- (* (truncate (+ ny (truncate height 2)) 32)
 			 32)
 		      (truncate height 2)))
-	  (setf jump-ok t))
+	  (when (not jump-ok)
+	    (setf jump-ok t)
+	    (setf jump-cool 10)))
 	 ;;bottom2
 	 ((equal 1 (get-map-state (+ nx 8) 
 				  (+ ny (truncate height 2))))
 	  (setf ny (- (* (truncate (+ ny (truncate height 2)) 32)
 			 32)
 		      (truncate height 2)))
-	  (setf jump-ok t)))
+	  (when (not jump-ok)
+	    (setf jump-ok t)
+	    (setf jump-cool 10))))
+	(incf nx vx)
 	(whens
-	  (right (incf nx vx))
-	  (left  (decf nx vx))
 	  ;;left1
 	  ((equal 1 (get-map-state (- nx (truncate width 2)) 
 				   (- ny 10)))
