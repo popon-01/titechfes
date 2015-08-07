@@ -17,3 +17,14 @@
 			  (make-instance 'wall
 			     :x (+ (* 32 w) 16)
 			     :y (+ (* 32 h) 16)))))))))
+(defun set-*map* (file-name)
+  (let* ((lis (iter (for line in-file file-name using #'read-line)
+		    (collect 
+			(iter 
+			  (for chr in (split-sequence #\space
+						      line))
+			  (collect (parse-integer chr))))))
+	(height (length lis))
+	 (width (apply #'max (mapcar #'length lis))))
+    (setf *map* (make-array (list height width)
+			    :initial-contents lis))))

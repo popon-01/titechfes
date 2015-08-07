@@ -29,7 +29,7 @@
   ((container :initarg :container :initform nil :accessor container)))
 
 (define-class wall ()
-  (x 0)
+  (x 0) ;; why don't have accessor get-x?
   (y 0)
   (width 32)
   (height 32)
