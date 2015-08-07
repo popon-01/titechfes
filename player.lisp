@@ -8,12 +8,11 @@
   (height 32)
   (image (error "image not initialized"))
   (vx 0)
+  (vvx 0)
   (vy 0)
   (jump-ok nil)
-  (jump-accel 0)
   (jump-cool 0)
-  (dash-ok nil)
-  (dash-aceel 0)
+  (dash-ok t)
   (dash-cool 0))
 
 (defun get-map-state (x y)
@@ -25,28 +24,35 @@
       0))
 
 (defmethod update-object ((p player))
-  (with-slots (x y width height vx vy 
-		 jump-ok jump-accel jump-cool
-		 dash-ok dash-aceel dash-cool) p
+  (with-slots (x y width height vx vvx vy 
+		 jump-ok jump-cool
+		 dash-ok dash-cool) p
     (with-slots (right left jump down shot dash) *keystate*
       (let ((nx x) (ny y))
 	(setf vx 0)
 	(whens
-	  (left (decf vx 5))
-	  (right (incf vx 5))
+	  ((and left dash-ok) 
+	   (decf vx 5))
+	  ((and right dash-ok)
+	   right (incf vx 5))
 	  ((and jump jump-ok (zerop jump-cool))
-	   (setf jump-ok nil) (setf jump-accel 10))
+	   (setf jump-ok nil) (setf vy -16))
 	  ((and dash dash-ok (zerop dash-cool))
-	   (setf dash-ok nil) (setf dash-aceel 10)))
-	(incf vy 2)
-	(when (> vy 10) (setf vy 10))
-	(when (< 0 jump-accel) (setf vy -8))
-	(decf jump-accel)
+	   (setf dash-ok nil)
+	   (if left
+	       (setf vvx -20)
+	       (setf vvx 20))))
+	(incf vy)
+	(whens ((< vvx 0) (incf vvx 2))
+	       ((> vvx 0) (decf vvx 2))
+	       ((> vy 10) (setf vy 10)))
 	(whens
-	  ((> dash-aceel 0) (decf dash-aceel))
 	  ((> jump-cool 0) (decf jump-cool))
 	  ((> dash-cool 0) (decf dash-cool)))
-	(incf ny vy)
+	;;move vertical
+	(if (< vy -10)
+	    (incf ny -10)
+	    (incf ny vy))
 	(whens 
 	 ;;up
 	 ((equal 1 (get-map-state nx (- ny (truncate height 2))))
@@ -60,18 +66,24 @@
 	  (setf ny (- (* (truncate (+ ny (truncate height 2)) 32)
 			 32)
 		      (truncate height 2)))
-	  (when (not jump-ok)
-	    (setf jump-ok t)
-	    (setf jump-cool 10)))
+	  (whens ((not jump-ok)
+		  (setf jump-ok t) (setf jump-cool 10))
+		 ((and (not dash-ok) (<= -5 vvx) (<= vvx 5))
+		  (setf dash-ok t) (setf dash-cool 10))))
 	 ;;bottom2
 	 ((equal 1 (get-map-state (+ nx 8) 
 				  (+ ny (truncate height 2))))
 	  (setf ny (- (* (truncate (+ ny (truncate height 2)) 32)
 			 32)
 		      (truncate height 2)))
-	  (when (not jump-ok)
-	    (setf jump-ok t)
-	    (setf jump-cool 10))))
+	  (whens ((not jump-ok)
+		  (setf jump-ok t) (setf jump-cool 10))
+		 ((and (not dash-ok) (<= -5 vvx) (<= vvx -5))
+		  (setf dash-ok t) (setf dash-cool 10)))))
+	;;move holizontal
+	(cond ((> vvx 10) (incf vx 10))
+	      ((< vvx -10) (incf vx -10))
+	      (t (incf vx vvx)))
 	(incf nx vx)
 	(whens
 	  ;;left1
