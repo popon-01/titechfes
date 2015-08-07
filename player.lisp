@@ -23,10 +23,10 @@
 (defmethod update-object ((p player))
   (with-slots (x y width height vx vy 
 		 jump-ok jump-accel) p
-    (with-slots (right left up down spdup) *keystate*
+    (with-slots (right left jump down shot) *keystate*
       (let ((nx x) (ny y))
 	(whens
-	  ((and up jump-ok)
+	  ((and jump jump-ok)
 	   (setf jump-ok nil) (setf jump-accel 10)))
 	(incf vy 2)
 	(when (> vy 10) (setf vy 10))

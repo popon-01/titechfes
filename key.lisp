@@ -19,7 +19,8 @@
 (defkeystate titechfes-key
     (right :sdl-key-right)
   (left :sdl-key-left)
-  (up :sdl-key-up)
+  (jump :sdl-key-Lshift)
   (down :sdl-key-down)
-  (spdup :sdl-key-Lshift))
+  (dash :sdl-key-z)
+  (shot :sdl-key-y))
 
