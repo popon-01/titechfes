@@ -5,7 +5,8 @@
   (sdl:with-init ()
     (sdl:window 320 320 :title-caption "lispbuilder-sdlサンプル")
     (setf (sdl:frame-rate) 60)
-    (setf *playerimage* (load-png-image (lib-path "me.png")))
+    (setf *playerimage-r* (load-png-image (lib-path "me.png")))
+    (setf *playerimage-l* (load-png-image (lib-path "me2.png")))
     (setf *wallimage* (load-png-image (lib-path "wall_g.png")))
     (setf *keystate* (make-instance 'titechfes-key))
     (let ((player (make-instance 'player 

@@ -13,7 +13,8 @@
   (jump-ok nil)
   (jump-cool 0)
   (dash-ok t)
-  (dash-cool 0))
+  (dash-cool 0)
+  (dir-right t))
 
 (defun get-map-state (x y)
   (if (and (<= 0 x)
@@ -24,17 +25,19 @@
       0))
 
 (defmethod update-object ((p player))
-  (with-slots (x y width height vx vvx vy 
+  (with-slots (x y width height 
+		 vx vvx vy image
 		 jump-ok jump-cool
-		 dash-ok dash-cool) p
+		 dash-ok dash-cool
+		 dir-right) p
     (with-slots (right left jump down shot dash) *keystate*
       (let ((nx x) (ny y))
 	(setf vx 0)
 	(whens
 	  ((and left dash-ok) 
-	   (decf vx 5))
+	   (decf vx 5) (setf dir-right nil))
 	  ((and right dash-ok)
-	   right (incf vx 5))
+	   (incf vx 5) (setf dir-right t))
 	  ((and jump jump-ok (zerop jump-cool))
 	   (setf jump-ok nil) (setf vy -16))
 	  ((and dash dash-ok (zerop dash-cool))
@@ -42,6 +45,9 @@
 	   (if left
 	       (setf vvx -20)
 	       (setf vvx 20))))
+	(if dir-right
+	    (setf image *playerimage-r*)
+	    (setf image *playerimage-l*))
 	(incf vy)
 	(whens ((< vvx 0) (incf vvx 2))
 	       ((> vvx 0) (decf vvx 2))
