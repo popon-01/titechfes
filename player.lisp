@@ -2,6 +2,8 @@
 
 ;;;player
 (define-class player (gameobject)
+  (image-r (get-image :player-r))
+  (image-l (get-image :player-l))
   (vx 0)
   (vvx 0)
   (vy 0)
@@ -20,13 +22,13 @@
       (aref *map* (truncate y 32) (truncate x 32))
       0))
 
-(defmethod update-object ((p player))
+(defmethod update-object ((p player) game)
   (with-slots (x y width height 
 		 vx vvx vy image
 		 in-air jump-cool
 		 dash-ok while-dash dash-cool
 		 dir-right) p
-    (with-slots (right left jump down shot dash) *keystate*
+    (with-slots (right left jump down shot dash) (keystate game)
       (let ((nx x) (ny y))
 	(setf vx 0)
 	(whens
@@ -118,8 +120,4 @@
 	(setf x nx)
 	(setf y ny)))))
   
-(defmethod draw-object ((p player))
-    (with-slots (x y width height image) p
-      (sdl:draw-surface-at-* image
-			     (- x (/ width 2))
-			     (- y (/ height 2)))))
+

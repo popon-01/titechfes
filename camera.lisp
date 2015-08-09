@@ -1,50 +1,44 @@
 (in-package :titechfes)
 
-(defvar *camera-position* '(0 0))
 (defparameter *camera-move-position* 50)
 
-(defun init-camera ()
-  (setf *camera-position* (list 0 0)))
+(defun init-camera (game)
+  (setf (camera game) (list 0 0)))
 
 ;;unko
-(defun camera-move (dx dy)
-  (setf *camera-position*
+(defun camera-move (dx dy game)
+  (setf (camera game)
 	(list 
-	 (alexandria:clamp  (+ (first *camera-position*) dx)
+	 (alexandria:clamp  (+ (first (camera game)) dx)
 			    0
-			    (* 32 (1- (array-dimension *map* 1))))
-	 (alexandria:clamp (+ (second *camera-position*) dy)
-			   (* -32 (1- (array-dimension *map* 0)))
+			    (first (map-size game)))
+	 (alexandria:clamp (+ (second (camera game)) dy)
+			   (- (second (map-size game)))
 			   0))))
 
-(defun coordinate-in-camera (coord)
-  (mapcar #'+ coord *camera-position*))
-(defun x-in-camera (x)
-  (- x (first *camera-position*)))
-(defun y-in-camera (y)
-  (- y (second *camera-position*)))
+(defun coordinate-in-camera (coord game)
+  (mapcar #'+ coord (camera game)))
+(defun x-in-camera (x game)
+  (- x (first (camera game))))
+(defun y-in-camera (y game)
+  (- y (second (camera game))))
 	 
 
-(defun update-camera (player)
-  (let ((px (x-in-camera (get-x player)))
-	(py (y-in-camera (get-y player))))
+(defun update-camera (game)
+  (let* ((player (player game))
+	 (px (x-in-camera (get-x player) game))
+	 (py (y-in-camera (get-y player) game)))
     (cond ((< px *camera-move-position*)
-	   (camera-move (- px *camera-move-position*) 0))
-	  ((< (- *width* px) *camera-move-position*)
+	   (camera-move (- px *camera-move-position*) 0 game))
+	  ((< (- (first (window-size game)) px) 
+	      *camera-move-position*)
 	   (camera-move (- *camera-move-position*
-			   (- *width* px)) 0)))
+			   (- (first (window-size game))px))
+			0 game)))
     (cond ((< py *camera-move-position*)
-	   (camera-move 0 (- py *camera-move-position*)))
-	  ((< (- *width* py) *camera-move-position*)
+	   (camera-move 0 (- py *camera-move-position*) game))
+	  ((< (- (second (window-size game)) py) 
+	      *camera-move-position*)
 	   (camera-move 0 (- *camera-move-position*
-			     (- *width* py)))))))
-
-
-;unko
-(defmethod draw-object :before (obj)
-  (decf (slot-value obj 'x) (first *camera-position*))
-  (decf (slot-value obj 'y) (second *camera-position*)))
-(defmethod draw-object :after (obj)
-  (incf (slot-value obj 'x) (first *camera-position*))
-  (incf (slot-value obj 'y) (second *camera-position*)))
-
+			     (- (second (window-size game))
+				py)) game)))))

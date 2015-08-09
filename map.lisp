@@ -1,25 +1,17 @@
 (in-package titechfes)
 
-(defun load-map (file-name)
+(defun load-map (file-name game)
+  (setf (map-size game) (list 0 0))
   (iter (for h upfrom 0)
 	(for line in-file file-name using #'read-line)
+	(setf (second (map-size game)) h)
 	(appending
 	 (iter (for w upfrom 0)
 	       (for code in (split-sequence #\space line))
-	       (setf (aref *map* h w) (parse-integer code))
-	       (cond ((string= "1" code) 
+	       (setf (first (map-size game)) w)
+	       (cond ((string= "1" code)
 		      (collect
 			  (make-instance 'wall
 			     :x (+ (* 32 w) 16)
 			     :y (+ (* 32 h) 16)))))))))
-(defun set-*map* (file-name)
-  (let* ((lis (iter (for line in-file file-name using #'read-line)
-		    (collect 
-			(iter 
-			  (for chr in (split-sequence #\space
-						      line))
-			  (collect (parse-integer chr))))))
-	(height (length lis))
-	 (width (apply #'max (mapcar #'length lis))))
-    (setf *map* (make-array (list height width)
-			    :initial-contents lis))))
+

@@ -1,28 +1,14 @@
 (in-package titechfes)
 ;------------------gameobject------------------
-(defgeneric update-all (objects))
-(defgeneric draw-all (objects))
-(defgeneric update-object (object))
-(defgeneric draw-object (object))
+(defgeneric update-object (object game))
+(defgeneric draw-object (object game))
 
-
-(defmacro init-object (object &rest group)
-  `(progn
-     (with-slots (width height image) ,object
-       (setf width (sdl:width image))
-       (setf height (sdl:height image)))
-     ,@(loop for g in group collect `(push ,object (container ,g)))))
-
-(defclass obj-group ()
-  ((container :initarg :container :initform nil :accessor container)))
-
-(defmethod update-all ((group obj-group))
-  (dolist (obj (container group))
-    (update-object obj)))
-
-(defmethod draw-all((group obj-group))
-  (dolist (obj (container group))
-    (draw-object obj)))
+(defun update-all (game)
+  (dolist (obj (all-object game))
+    (update-object obj game)))
+(defun draw-all (game)
+  (dolist (obj (all-object game))
+    (draw-object obj game)))
 
 ;;gameobject
 (define-class gameobject ()
@@ -37,27 +23,18 @@
     (setf width (sdl:width image)
 	  height (sdl:height image))))
 
-;;;wall
-(defclass map-group (gameobject)
-  ((container :initarg :container :initform nil :accessor container)))
-
-(define-class wall ()
-  (x 0) ;; why don't have accessor get-x?
-  (y 0)
-  (width 32)
-  (height 32)
-  (image (get-image :wall)))
-
-(defmethod update-object ((w wall)))
-
-(defmethod draw-object ((w wall))
-  (with-slots (x y width height image) w
+(defmethod draw-object ((obj gameobject) game)
+  (with-slots (x y width height image) obj
     (sdl:draw-surface-at-* image
-			   (- x (/ width 2))
-			   (- y (/ height 2)))))
+			   (- (x-in-camera x game) 
+			      (/ width 2))
+			   (- (y-in-camera y game) 
+			      (/ height 2)))))
+(defmethod update-object ((obj gameobject) game))
 
-
-
+;;;wall
+(define-class wall (gameobject)
+  (image (get-image :wall)))
 
 ;------------------collide------------------
 (defgeneric rect-collide (a b))

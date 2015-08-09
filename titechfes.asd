@@ -11,6 +11,7 @@
 	       (:file "loadimage")
 	       (:file "loadfile")
 	       (:file "key")
+	       (:file "game")
 	       (:file "gameobject")
 	       (:file "player")
 	       (:file "map")
