@@ -1,10 +1,5 @@
 (in-package titechfes)
 
-(defmethod initialize-instance :after ((w wall) &key)
-  (with-accessors ((image image) (w width) (h height)) w
-    (setf w (sdl:width image)
-	  h (sdl:height image))))
-
 (defun load-map (file-name)
   (iter (for h upfrom 0)
 	(for line in-file file-name using #'read-line)

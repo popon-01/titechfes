@@ -24,8 +24,21 @@
   (dolist (obj (container group))
     (draw-object obj)))
 
+;;gameobject
+(define-class gameobject ()
+  (x 0 get-x)
+  (y 0 get-y)
+  width
+  height
+  image)
+
+(defmethod initialize-instance :after ((obj gameobject) &key)
+  (with-slots (image width height) obj
+    (setf width (sdl:width image)
+	  height (sdl:height image))))
+
 ;;;wall
-(defclass map-group ()
+(defclass map-group (gameobject)
   ((container :initarg :container :initform nil :accessor container)))
 
 (define-class wall ()

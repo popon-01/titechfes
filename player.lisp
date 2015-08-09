@@ -1,12 +1,7 @@
 (in-package titechfes)
 
 ;;;player
-(define-class player ()
-  (x 0 get-x)
-  (y 0 get-y)
-  (width 24)
-  (height 32)
-  (image (error "image not initialized"))
+(define-class player (gameobject)
   (vx 0)
   (vvx 0)
   (vy 0)
