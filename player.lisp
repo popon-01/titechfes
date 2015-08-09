@@ -90,7 +90,7 @@
 		  (setf in-air t) (setf jump-cool 10))
 		 ((and (not dash-ok) (not while-dash))
 		  (setf dash-ok t)))))
-	;;move holizontal
+	;;move horizontal
 	(cond ((> vvx 10) (incf vx 10))
 	      ((< vvx -10) (incf vx -10))
 	      (t (incf vx vvx)))
