@@ -1,0 +1,11 @@
+(in-package titechfes)
+
+(define-class game ()
+  (window-size '(640 480))
+  (map-size nil)
+  (camera '(0 0))
+  (player nil)
+  (all-object nil)
+  (mapchips nil)
+  (enemies nil)
+  (bullets nil))
