@@ -7,7 +7,7 @@
     (setf (sdl:frame-rate) 60)
     (load-images '(:wall "wall_g.png")
 		 '(:player-l "me2.png")
-		 '(:player-r "me2.png"))
+		 '(:player-r "me.png"))
     (let ((game
 	   (make-instance 'game 
 	     :player 

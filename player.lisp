@@ -14,23 +14,17 @@
   (dash-cool 0)
   (dir-right t))
 
-(defun get-map-state (x y)
-  (if (and (<= 0 x)
-	   (<= 0 y)
-	   (< x 320)
-	   (< y 320))
-      (aref *map* (truncate y 32) (truncate x 32))
-      0))
-
 (defmethod update-object ((p player) game)
   (with-slots (x y width height 
-		 vx vvx vy image
+		 vx vvx vy
+		 image image-r image-l
 		 in-air jump-cool
 		 dash-ok while-dash dash-cool
 		 dir-right) p
     (with-slots (right left jump down shot dash) (keystate game)
-      (let ((nx x) (ny y))
-	(setf vx 0)
+      (let ((nx x) (ny y) )
+	(setf vx 0
+	      image (if dir-right image-r image-l))
 	(whens
 	  ((and left (not while-dash)) 
 	   (decf vx 5) (setf dir-right nil))
@@ -44,9 +38,6 @@
 	   (if dir-right
 	       (setf vvx 20)
 	       (setf vvx -20))))
-	(if dir-right
-	    (setf image *playerimage-r*)
-	    (setf image *playerimage-l*))
 	(when (and while-dash (<= -5 vvx) (<= vvx 5))
 	  (setf while-dash nil dash-cool 10))
 	(incf vy)
@@ -60,64 +51,67 @@
 	(cond (while-dash (incf ny 0)) 
 	      ((< vy -10) (incf ny -10))
 	      (t (incf ny vy)))
-	(whens 
-	 ;;up
-	 ((equal 1 (get-map-state nx (- ny (truncate height 2))))
-	  (setf ny (+ (* (+ (truncate (- ny (truncate height 2)) 32) 1)
-			 32)
-		      (truncate height 2)))
-	  (setf vy 0))
-	 ;;bottom1
-	 ((equal 1 (get-map-state (- nx 8) 
-				  (+ ny (truncate height 2))))
-	  (setf ny (- (* (truncate (+ ny (truncate height 2)) 32)
-			 32)
-		      (truncate height 2)))
-	  (whens ((not in-air)
-		  (setf in-air t) (setf jump-cool 10))
-		 ((and (not dash-ok) (not while-dash))
-		  (setf dash-ok t))))
-	 ;;bottom2
-	 ((equal 1 (get-map-state (+ nx 8) 
-				  (+ ny (truncate height 2))))
-	  (setf ny (- (* (truncate (+ ny (truncate height 2)) 32)
-			 32)
-		      (truncate height 2)))
-	  (whens ((not in-air)
-		  (setf in-air t) (setf jump-cool 10))
-		 ((and (not dash-ok) (not while-dash))
-		  (setf dash-ok t)))))
-	;;move holizontal
+	(dolist (chip (mapchips game))
+	  (whens 
+	   ;;up
+	   ((and (< (- (get-x chip) 16) nx)
+		 (< nx (+ (get-x chip) 16))
+		 (< (- (get-y chip) 16) (- ny (truncate height 2)))
+		 (< (- ny (truncate height 2)) (+ (get-y chip) 16)))
+	    (setf ny (+ (get-y chip) 32))
+	    (setf vy 0))
+	   ;;bottom1
+	   ((and (< (- (get-x chip) 16) (- nx 12)) 
+		 (< (- nx 12) (+ (get-x chip) 16))
+		 (< (- (get-y chip) 16) (+ ny (truncate height 2)))
+		 (< (+ ny (truncate height 2)) (+ (get-y chip) 16)))
+	    (setf ny (- (get-y chip) 32))
+	    (whens ((not in-air)
+		    (setf in-air t) (setf jump-cool 10))
+		   ((and (not dash-ok) (not while-dash))
+		    (setf dash-ok t))))
+	   ;;bottom2
+	   ((and (< (- (get-x chip) 16) (+ nx 12))
+		 (< (+ nx 12) (+ (get-x chip) 16))
+		 (< (- (get-y chip) 16) (+ ny (truncate height 2)))
+		 (< (+ ny (truncate height 2)) (+ (get-y chip) 16)))
+	    (setf ny (- (get-y chip) 32))
+	    (whens ((not in-air)
+		    (setf in-air t
+			  jump-cool 10))
+		   ((and (not dash-ok) (not while-dash))
+		    (setf dash-ok t))))))
+	  ;;move holizontal
 	(cond ((> vvx 10) (incf vx 10))
 	      ((< vvx -10) (incf vx -10))
 	      (t (incf vx vvx)))
 	(incf nx vx)
-	(whens
-	  ;;left1
-	  ((equal 1 (get-map-state (- nx (truncate width 2)) 
-				   (- ny 10)))
-	   (setf nx (+ (* (+ (truncate (- nx (truncate width 2))32) 1)
-			  32)
-		       (truncate width 2))))
-	  ;;left2
-	  ((equal 1 (get-map-state (- nx (truncate width 2)) 
-				   (+ ny 10)))
-	   (setf nx (+ (* (+ (truncate  (- nx (truncate width 2)) 32) 1)
-			  32)
-		       (truncate width 2))))
-	  ;;right1
-	  ((equal 1 (get-map-state (+ nx (truncate width 2)) 
-				   (- ny 10)))
-	   (setf nx (- (* (truncate (+ nx (truncate width 2)) 32) 
-			  32)
-		       (truncate width 2))))
-	  ;;right2
-	  ((equal 1 (get-map-state (+ nx (truncate width 2)) 
-				   (+ ny 10)))
-	   (setf nx (- (* (truncate  (+ nx (truncate width 2)) 32) 
-			  32)
-		       (truncate width 2)))))
+	(dolist (chip (mapchips game))
+	  (whens
+	   ;;left1
+	   ((and (< (- (get-x chip) 16) (+ nx (truncate width 2)))
+		 (< (+ nx (truncate width 2)) (+ (get-x chip) 16))
+		 (< (- (get-y chip) 16) (- ny 10))
+		 (< (- ny 10) (+ (get-y chip) 16)))
+	    (setf nx (- (get-x chip) 28)))
+	   ;;left2
+	   ((and (< (- (get-x chip) 16) (+ nx (truncate width 2)))
+		 (< (+ nx (truncate width 2)) (+ (get-x chip) 16))
+		 (< (- (get-y chip) 16) (+ ny 10))
+		 (< (+ ny 10) (+ (get-y chip) 16)))
+	    (setf nx (- (get-x chip) 28)))
+	   ;;right1
+	   ((and (< (- (get-x chip) 16) (- nx (truncate width 2)))
+		 (< (- nx (truncate width 2)) (+ (get-x chip) 16))
+		 (< (- (get-y chip) 16) (- ny 10))
+		 (< (- ny 10) (+ (get-y chip) 16)))
+	    (setf nx (+ (get-x chip) 28)))
+	   ;;right2
+	   ((and (< (- (get-x chip) 16) (- nx (truncate width 2)))
+		 (< (- nx (truncate width 2)) (+ (get-x chip) 16))
+		 (< (- (get-y chip) 16) (+ ny 10))
+		 (< (+ ny 10) (+ (get-y chip) 16)))
+	    (setf nx (+ (get-x chip) 28)))))
 	(setf x nx)
 	(setf y ny)))))
   
-
