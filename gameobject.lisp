@@ -2,6 +2,7 @@
 ;------------------gameobject------------------
 (defgeneric update-object (object game))
 (defgeneric draw-object (object game))
+(defgeneric collide (obj-a obj-b))
 
 (defun update-all (game)
   (dolist (obj (all-object game))
@@ -41,11 +42,11 @@
 
 (defmethod rect-collide (a b)
   (and (< (- (x a) (/ (width a) 2))
-	      (+ (x b) (/ (width b) 2)))
+	  (+ (x b) (/ (width b) 2)))
        (< (- (x b) (/ (width b) 2))
 	  (+ (x a) (/ (width a) 2)))
        (< (- (y a) (/ (height a) 2))
-	      (+ (y b) (/ (height b) 2)))
+	  (+ (y b) (/ (height b) 2)))
        (< (- (y b) (/ (height b) 2))
 	  (+ (y a) (/ (height a) 2)))))
 
