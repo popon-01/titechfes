@@ -40,6 +40,8 @@
 			   (keystate game)))
 	(:idle (update-all game)
 	       (update-camera game)
+	       (when (not (alive (player game)))
+		 (sdl:push-quit-event))
 	       (sdl:clear-display sdl:*black*)
 	       (draw-all game)
 	       (sdl:update-display))))))

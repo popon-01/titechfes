@@ -14,6 +14,11 @@
   (dash-cool 0)
   (dir-right t))
 
+(defun get-left (px w)
+  (- px (truncate w 2)))
+(defun get-top (py h)
+  (- py (truncate h 2)))
+
 (defun rect-collision-judge (rec1 rec2)
   (and (< (sdl:x rec1) (sdl:x2 rec2))
        (< (sdl:x rec2) (sdl:x2 rec1))
@@ -26,20 +31,30 @@
 		  in-air jump-cool
 		  dash-ok while-dash) ply
     (sdl:with-rectangle (chip-rec (sdl:rectangle 
-				   :x (- (get-x chip) 16)
-				   :y (- (get-y chip) 16)
+				   :x (get-left (get-x chip) 
+						(width chip)) 
+				   :y (get-top (get-y chip)
+					       (height chip))
 				   :w (width chip)
 				   :h (height chip)))
       ;;horizontal
       (sdl:with-rectangle (ply-x-rec (sdl:rectangle 
-				      :x (- (+ (get-x ply) vx) 12)
-				      :y (- (get-y ply) 16)
+				      :x (get-left (+ (get-x ply) vx)
+						   (width ply))
+				      :y (get-top (get-y ply) 
+						  (height ply))
 				      :w (width ply)
 				      :h (height ply)))
 	(when (rect-collision-judge chip-rec ply-x-rec)
 	  (if (plusp vx)
-	      (setf vx (- (get-x chip) 28 (get-x ply)))
-	      (setf vx (- (get-x chip) -28 (get-x ply))))))
+	      (setf vx (- (get-x chip) 
+			  (+ (truncate (width chip) 2)
+			     (truncate (width ply) 2))
+			  (get-x ply)))
+	      (setf vx (- (get-x chip)
+			  (- (+ (truncate (width chip) 2)
+				(truncate (width ply) 2))) 
+			  (get-x ply))))))
       ;;vertical
       (sdl:with-rectangle (ply-y-rec (sdl:rectangle 
 				      :x (- (get-x ply) 12)
@@ -48,13 +63,19 @@
 				      :h (height ply)))
 	(when (rect-collision-judge chip-rec ply-y-rec)
 	  (if (plusp vy)
-	      (progn (setf vy (- (get-y chip) 32 (get-y ply)))
+	      (progn (setf vy (- (get-y chip)
+				 (+ (truncate (height chip) 2)
+				    (truncate (height ply) 2))
+				 (get-y ply)))
 		     (whens (in-air
 			     (setf in-air nil
 				   jump-cool 10))
 			    ((and (not dash-ok) (not while-dash))
 			     (setf dash-ok t))))
-	      (setf vy (- (get-y chip) -32 (get-y ply)))))))))
+	      (setf vy (- (get-y chip)
+			  (- (+ (truncate (height chip) 2)
+				(truncate (height ply) 2)))
+			  (get-y ply)))))))))
 
 (defmethod update-object ((p player) game)
   (with-slots (x y width height 
@@ -62,7 +83,7 @@
 		 image image-r image-l
 		 in-air jump-cool
 		 dash-ok while-dash dash-cool
-		 dir-right) p
+		 dir-right alive) p
     (with-slots (right left jump down shot dash) (keystate game)
       (setf vx 0
 	    image (if dir-right image-r image-l))
@@ -78,7 +99,9 @@
        ((and dash dash-ok (zerop dash-cool))
 	(setf while-dash t
 	      dash-ok nil
-	      vvx (if dir-right 20 -20))))
+	      vvx (if dir-right 20 -20)))
+       (down (setf alive nil)))
+      ;;alive-detect
       ;;acceleration
       (if while-dash (setf vy 0) (incf vy))
       (when (> vy 10) (setf vy 10))
