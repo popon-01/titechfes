@@ -56,3 +56,13 @@
        (< (- (get-y b) (/ (height b) 2))
 	  (+ (get-y a) (/ (height a) 2)))))
 
+(defun get-left (px w)
+  (- px (truncate w 2)))
+(defun get-top (py h)
+  (- py (truncate h 2)))
+
+(defun rect-collision-judge (rec1 rec2)
+  (and (< (sdl:x rec1) (sdl:x2 rec2))
+       (< (sdl:x rec2) (sdl:x2 rec1))
+       (< (sdl:y rec1) (sdl:y2 rec2))
+       (< (sdl:y rec2) (sdl:y2 rec1))))

@@ -14,6 +14,7 @@
 	       (:file "game")
 	       (:file "gameobject")
 	       (:file "bullet")
+	       (:file "enemy")
 	       (:file "player")
 	       (:file "map")
 	       (:file "camera")

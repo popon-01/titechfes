@@ -10,7 +10,8 @@
 
 (define-class knife (bullet)
   (image (get-image :bullet))
-  (life 20))
+  (life 20)
+  (atk 20))
 
 (defmethod update-object ((bul knife) game)
   (decf (life bul))
