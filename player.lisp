@@ -15,17 +15,6 @@
   (shot-cool 0)
   (dir-right t))
 
-(defun get-left (px w)
-  (- px (truncate w 2)))
-(defun get-top (py h)
-  (- py (truncate h 2)))
-
-(defun rect-collision-judge (rec1 rec2)
-  (and (< (sdl:x rec1) (sdl:x2 rec2))
-       (< (sdl:x rec2) (sdl:x2 rec1))
-       (< (sdl:y rec1) (sdl:y2 rec2))
-       (< (sdl:y rec2) (sdl:y2 rec1))))
-
 (defun player-shot (ply game)
   (let ((bul (make-instance 'knife :vx (if (dir-right ply) 7 -7))))
     (setf (get-x bul) (if (dir-right ply)
