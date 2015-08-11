@@ -6,8 +6,11 @@
     (sdl:window 320 320 :title-caption "lispbuilder-sdlサンプル")
     (setf (sdl:frame-rate) 60)
     (load-images '(:wall "wall_g.png")
+		 '(:bullet "knife.png")
 		 '(:player-l "me2.png")
-		 '(:player-r "me.png"))
+		 '(:player-r "me.png")
+		 '(:ememy-l "enemy2.png")
+		 '(:enemy-r "enemy.png"))
     (let ((game
 	   (make-instance 'game 
 	     :player 

@@ -38,7 +38,7 @@
 			   (- (y-in-camera y game) 
 			      (/ height 2)))))
 (defmethod update-object ((obj gameobject) game))
-
+(defmethod collide ((obj-a gameobject) (obj-b gameobject)))
 ;;;wall
 (define-class wall (gameobject)
   (image (get-image :wall)))

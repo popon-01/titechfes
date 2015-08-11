@@ -13,6 +13,7 @@
 	       (:file "key")
 	       (:file "game")
 	       (:file "gameobject")
+	       (:file "bullet")
 	       (:file "player")
 	       (:file "map")
 	       (:file "camera")
