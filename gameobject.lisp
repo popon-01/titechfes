@@ -2,10 +2,16 @@
 ;------------------gameobject------------------
 (defgeneric update-object (object game))
 (defgeneric draw-object (object game))
+(defgeneric collide (obj-a obj-b))
 
 (defun update-all (game)
   (dolist (obj (all-object game))
-    (update-object obj game)))
+    (update-object obj game))
+  (setf (all-object game) (remove-if-not #'alive (all-object game))
+	(mapchips game) (remove-if-not #'alive (mapchips game))
+	(enemies game) (remove-if-not #'alive (enemies game))
+	(bullets game) (remove-if-not #'alive (bullets game))))
+
 (defun draw-all (game)
   (dolist (obj (all-object game))
     (draw-object obj game)))
@@ -16,6 +22,7 @@
   (y 0 get-y)
   width
   height
+  (alive t)
   image)
 
 (defmethod initialize-instance :after ((obj gameobject) &key)
@@ -31,7 +38,7 @@
 			   (- (y-in-camera y game) 
 			      (/ height 2)))))
 (defmethod update-object ((obj gameobject) game))
-
+(defmethod collide ((obj-a gameobject) (obj-b gameobject)))
 ;;;wall
 (define-class wall (gameobject)
   (image (get-image :wall)))
@@ -40,12 +47,22 @@
 (defgeneric rect-collide (a b))
 
 (defmethod rect-collide (a b)
-  (and (< (- (x a) (/ (width a) 2))
-	      (+ (x b) (/ (width b) 2)))
-       (< (- (x b) (/ (width b) 2))
-	  (+ (x a) (/ (width a) 2)))
-       (< (- (y a) (/ (height a) 2))
-	      (+ (y b) (/ (height b) 2)))
-       (< (- (y b) (/ (height b) 2))
-	  (+ (y a) (/ (height a) 2)))))
+  (and (< (- (get-x a) (/ (width a) 2))
+	  (+ (get-x b) (/ (width b) 2)))
+       (< (- (get-x b) (/ (width b) 2))
+	  (+ (get-x a) (/ (width a) 2)))
+       (< (- (get-y a) (/ (height a) 2))
+	  (+ (get-y b) (/ (height b) 2)))
+       (< (- (get-y b) (/ (height b) 2))
+	  (+ (get-y a) (/ (height a) 2)))))
 
+(defun get-left (px w)
+  (- px (truncate w 2)))
+(defun get-top (py h)
+  (- py (truncate h 2)))
+
+(defun rect-collision-judge (rec1 rec2)
+  (and (< (sdl:x rec1) (sdl:x2 rec2))
+       (< (sdl:x rec2) (sdl:x2 rec1))
+       (< (sdl:y rec1) (sdl:y2 rec2))
+       (< (sdl:y rec2) (sdl:y2 rec1))))

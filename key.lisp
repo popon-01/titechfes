@@ -22,5 +22,5 @@
   (jump :sdl-key-Lshift)
   (down :sdl-key-down)
   (dash :sdl-key-z)
-  (shot :sdl-key-y))
+  (shot :sdl-key-x))
 
