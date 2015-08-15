@@ -11,29 +11,8 @@
 		 '(:player-r "me.png")
 		 '(:enemy-l "enemy2.png")
 		 '(:enemy-r "enemy.png"))
-    (let ((game
-	   (make-instance 'game 
-	     :player 
-	     (make-instance 'player 
-		:x 48 
-		:y 48 
-		:image (get-image 
-			:player-l))
-	     :keystate 
-	     (make-instance 'titechfes-key))))
-      (push (player game) (all-object game))
-      (let ((map-objects (load-map (lib-path "map.txt") 
-				   game))
-	    (enem1 (make-instance 'aomura
-				  :x 300 :y 48 :vx 2
-				  :image (get-image 
-					  :enemy-l))))
-	(setf (all-object game)
-	      (nconc (all-object game) map-objects)
-	      (mapchips game)
-	      (nconc (mapchips game) map-objects))
-	(push enem1 (all-object game))
-	(push enem1 (enemies game)))
+    (let ((game (make-instance 'game)))
+      (load-map (lib-path "map.txt") game)
       (init-camera game)
       (sdl:update-display)
       (sdl:with-events ()
@@ -53,4 +32,5 @@
 		 (sdl:push-quit-event))
 	       (sdl:clear-display sdl:*black*)
 	       (draw-all game)
+	       (print (map-size game))
 	       (sdl:update-display))))))

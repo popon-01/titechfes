@@ -61,6 +61,7 @@
     (decf (hp enem) (atk bul))))
 
 (define-class aomura (enemy)
+  (image (get-image :enemy-l))
   (image-r (get-image :enemy-r))
   (image-l (get-image :enemy-l))
   (turn-routine 20)
