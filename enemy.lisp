@@ -9,7 +9,7 @@
   (incf (get-x enem) (vx enem))
   (incf (get-y enem) (vy enem)))
 
-(defmethod collide ((enem enemy) (chip wall))
+(definteract-method collide (enem enemy) (chip wall)
   (with-slots (vx vy) enem
     (sdl:with-rectangle (chip-rec (sdl:rectangle 
 				   :x (get-left (get-x chip) 
@@ -55,7 +55,7 @@
 				(truncate (height enem) 2)))
 			  (get-y enem)))))))))
 
-(defmethod collide ((enem enemy) (bul bullet))
+(definteract-method collide (enem enemy) (bul bullet)
   (when (rect-collide enem bul)
     (setf (alive bul) nil)
     (decf (hp enem) (atk bul))))
@@ -79,9 +79,5 @@
 		  jump-routine 75)))
     (whens ((plusp turn-routine) (decf turn-routine))
 	   ((plusp jump-routine) (decf jump-routine)))
-    (when (<= (hp enem) 0) (setf (alive enem) nil))
-    (dolist (chip (mapchips game))
-      (collide enem chip))
-    (dolist (bul (bullets game))
-      (collide enem bul))))
+    (when (<= (hp enem) 0) (setf (alive enem) nil))))
 

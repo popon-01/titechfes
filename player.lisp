@@ -12,32 +12,20 @@
   (dash-ok t)
   (while-dash nil)
   (dash-cool 0)
+  (shot-func #'shot-knife)
   (shot-cool 0)
   (dir-right t))
 
-(defun player-shot (ply game)
-  (let ((bul (make-instance 'knife :vx (if (dir-right ply) 7 -7))))
-    (setf (get-x bul) (if (dir-right ply)
-			  (+ (get-x ply)
-			     (truncate (width ply) 2) 
-			     (truncate (width bul) 2))
-			  (- (get-x ply)
-			     (truncate (width ply) 2) 
-			     (truncate (width bul) 2)))
-	  (get-y bul) (get-y ply))
-    (push bul (all-object game))
-    (push bul (bullets game))
-    (setf (shot-cool ply) 10)))
 
 (defun player-keyevents (ply game)
   (with-slots (vx vy vvx in-air jump-cool
 		  dash-ok while-dash dash-cool
-		  shot-cool
+		  shot-func shot-cool
 		  dir-right alive) ply
       (with-slots (right left jump down shot dash) (keystate game)
 	(whens
 	  ((and shot (zerop shot-cool))
-	   (player-shot ply game))
+	   (funcall shot-func ply game))
 	  ((and left (not while-dash)) 
 	   (decf vx 3) (setf dir-right nil))
 	  ((and right (not while-dash))
@@ -79,16 +67,13 @@
     (player-keyevents ply game)
     ;;(alive-detect)
     (player-accelerarion ply)
-    (player-flag-update ply)
-    ;;move
-    (dolist (chip (mapchips game))
-      (collide ply chip))))
+    (player-flag-update ply)))
 
 (defmethod draw-object :before ((ply player) game)
   (incf (get-x ply) (vx ply))
   (incf (get-y ply) (vy ply)))
   
-(defmethod collide ((ply player) (chip wall))
+(definteract-method collide (ply player) (chip wall)
   (with-slots (vx vy
 		  in-air jump-cool
 		  dash-ok while-dash) ply
