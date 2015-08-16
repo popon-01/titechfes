@@ -1,9 +1,24 @@
 (in-package :titechfes)
 
+
+(defun draw-info (game)
+  (sdl:draw-box-* 180 15 100 10 :color sdl:*red*)
+  (sdl:draw-box-* 180 15 (truncate (* (hp (player game)) 100)
+					 (max-hp (player game))) 10 
+					 :color sdl:*green*)
+  (sdl:draw-string-solid-* "hp" 160 10 )
+  (sdl:draw-string-solid-* (format nil "~D" 
+				   (hp (player game)))
+			   280 10 )
+  (sdl:draw-string-solid-* (shot-name (player game))
+			   320 10))
+
+
 ;------------------main------------------
 (defun main ()
   (sdl:with-init ()
     (sdl:window 640 480 :title-caption "魔津村")
+    (sdl:initialise-default-font  sdl:*font-9x18b*)
     (setf (sdl:frame-rate) 60)
     (load-images '(:wall "wall_g.png")
 		 '(:bullet "knife.png")
@@ -54,4 +69,5 @@
 		 (sdl:push-quit-event))
 	       (sdl:clear-display sdl:*black*)
 	       (draw-all game)
+	       (draw-info game)
 	       (sdl:update-display))))))

@@ -39,3 +39,4 @@
     (push bul (bullets game))
     (setf (shot-cool ply) (cool-time bul))))
 
+;;
