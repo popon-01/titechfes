@@ -3,7 +3,15 @@
 (define-class enemy (gameobject)
   (vx 0)
   (vy 0)
-  (hp 100))
+  (hp 100)
+  (muteki nil)
+  (muteki-count 0))
+
+(defmethod update-object :before ((enem enemy) game)
+  (when (muteki enem)
+    (if (zerop (muteki-count enem))
+	(setf (muteki enem) nil)
+	(decf (muteki-count enem)))))
 
 (defmethod draw-object :before ((enem enemy) game)
   (incf (get-x enem) (vx enem))
@@ -55,10 +63,9 @@
 				(truncate (height enem) 2)))
 			  (get-y enem)))))))))
 
-(definteract-method collide (enem enemy) (bul bullet)
-  (when (rect-collide enem bul)
-    (setf (alive bul) nil)
-    (decf (hp enem) (atk bul))))
+
+
+;;aomura
 
 (define-class aomura (enemy)
   (image-r (get-image :enemy-r))
@@ -70,7 +77,7 @@
   (with-slots (image-r image-l 
 		       turn-routine jump-routine) enem
     (setf (image enem) (if (plusp (vx enem)) image-r image-l))
-    (incf (vy enem))
+    (incf (vy enem) *gravity*)
     (whens ((zerop turn-routine)
 	    (setf (vx enem) (- (vx enem))
 		  turn-routine 75))

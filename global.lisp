@@ -7,3 +7,5 @@
 (defvar *lib-path* (merge-pathnames "lib/" *dir-path*))
 (defvar *width* 320)
 (defvar *height* 320)
+(defparameter *gravity* 1)
+(defparameter *enemy-mutekitime* 10)

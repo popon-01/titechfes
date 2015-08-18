@@ -1,5 +1,15 @@
 (in-package :titechfes)
 
+(defun gameimage-load ()
+  (load-images '(:wall "wall_g.png")
+	       '(:knife "knife.png")
+	       '(:axe "axe.png")
+	       '(:explosion "explosion.png")
+	       '(:player-l "me2.png")
+	       '(:player-r "me.png")
+	       '(:enemy-l "enemy2.png")
+	       '(:enemy-r "enemy.png")))
+
 
 (defun draw-info (game)
   (sdl:draw-box-* 180 15 100 10 :color sdl:*red*)
@@ -19,13 +29,8 @@
   (sdl:with-init ()
     (sdl:window 640 480 :title-caption "魔津村")
     (sdl:initialise-default-font  sdl:*font-9x18b*)
+    (gameimage-load)
     (setf (sdl:frame-rate) 60)
-    (load-images '(:wall "wall_g.png")
-		 '(:bullet "knife.png")
-		 '(:player-l "me2.png")
-		 '(:player-r "me.png")
-		 '(:enemy-l "enemy2.png")
-		 '(:enemy-r "enemy.png"))
     (let ((game
 	   (make-instance 'game 
 	     :player 

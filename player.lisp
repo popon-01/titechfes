@@ -15,7 +15,7 @@
   (while-dash nil)
   (dash-cool 0)
   (shot-name "Knife")
-  (shot-func #'shot-knife)
+  (shot-func #'shot-boomerang)
   (shot-cool 0)
   (dir-right t))
 
@@ -45,7 +45,7 @@
 
 (defun player-accelerarion (ply)
   (with-slots  (vx vy vvx while-dash) ply
-    (if while-dash (setf vy 0) (incf vy))
+    (if while-dash (setf vy 0) (incf vy *gravity*))
     (when (> vy 10) (setf vy 10))
     (whens ((< vvx 0) (incf vvx 2))
 	   ((> vvx 0) (decf vvx 2)))
