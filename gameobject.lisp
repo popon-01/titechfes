@@ -2,7 +2,7 @@
 ;------------------gameobject------------------
 (defgeneric update-object (object game))
 (defgeneric draw-object (object game))
-(defgeneric collide (obj-a obj-b))
+
 
 (defun update-all (game)
   (dolist (obj (all-object game))
@@ -38,7 +38,7 @@
 			   (- (y-in-camera y game) 
 			      (/ height 2)))))
 (defmethod update-object ((obj gameobject) game))
-(defmethod collide ((obj-a gameobject) (obj-b gameobject)))
+
 (defmethod kill ((obj gameobject)) (setf (alive obj) nil))
 ;;;wall
 (define-class wall (gameobject)

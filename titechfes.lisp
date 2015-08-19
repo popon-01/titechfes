@@ -50,7 +50,8 @@
 		       (update-key-state key nil
 			   (keystate game)))
 	(:idle (update-all game)
-	       (round-robin #'collide (all-object game))
+	       (round-robin (rcurry #'collide game)
+			    (all-object game))
 	       (update-camera game)
 	       (when (not (alive (player game)))
 		 (sdl:push-quit-event))

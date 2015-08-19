@@ -1,6 +1,14 @@
 ;;;; package.lisp
 
 (defpackage :titechfes
-  (:use :cl :split-sequence :iterate)
+  (:use :cl :split-sequence :iterate :alexandria)
   (:export main))
+
+
+
+
+
+
+
+
 

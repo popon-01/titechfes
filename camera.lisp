@@ -9,14 +9,14 @@
 (defun camera-move (dx dy game)
   (setf (camera game)
 	(list 
-	 (alexandria:clamp  (+ (first (camera game)) dx)
-			    0
-			    (- (first (map-size game))
-			       (first (window-size game))))
-	 (alexandria:clamp (+ (second (camera game)) dy)
-			   0
-			   (- (second (map-size game))
-			      (second (window-size game)))))))
+	 (clamp  (+ (first (camera game)) dx)
+		 0
+		 (- (first (map-size game))
+		    (first (window-size game))))
+	 (clamp (+ (second (camera game)) dy)
+		0
+		(- (second (map-size game))
+		   (second (window-size game)))))))
 
 (defun coordinate-in-camera (coord game)
   (mapcar #'+ coord (camera game)))

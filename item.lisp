@@ -9,8 +9,9 @@
 			    10
 			    :color sdl:*green*))
 
-(defmethod collide ((item item) (p player))
-  (when (rect-collide item p) (kill item)))
-(defmethod update-object ((item item) (game game))
-  (collide item (player game)))
+
+(define-class weapon-item (item)
+  weapon)
+
+
 

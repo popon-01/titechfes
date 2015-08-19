@@ -16,7 +16,7 @@
   (while-dash nil)
   (dash-cool 0)
   (shot-name "Knife")
-  (shot-func #'shot-boomerang)
+  (shot-func #'shot-knife)
   (shot-cool 0)
   (dir-right t)
   (muteki nil)
@@ -83,3 +83,8 @@
   (incf (get-x ply) (vx ply))
   (incf (get-y ply) (vy ply)))
   
+(defmethod change-bullet (bsym (player player))
+  (setf (shot-name player)
+	(format nil "~@(~a~)" bsym)
+	(shot-func player)
+	(symbol-function (symbolicate 'shot- bsym))))

@@ -17,6 +17,9 @@
 ;(defmethod update-object ((bul name) game))
 ;(defun shot-name (ply game))
 
+(defmacro shoot (weapon player game &rest rest)
+  `(set-bullet (make-instance ',weapon ,@rest) ,player ,game))
+
 (defun set-bullet (instance ply game)
   (let ((bul instance))
     (when (not (dir-right ply)) (setf (vx bul) (- (vx bul))))
@@ -45,7 +48,7 @@
   (when (zerop (life bul)) (setf (alive bul) nil)))
 
 (defun shot-knife (ply game)
-    (set-bullet (make-instance 'knife) ply game))
+  (shoot knife ply game))
 
 ;;;axe
 (define-class axe (bullet)
@@ -61,7 +64,7 @@
 
 
 (defun shot-axe (ply game)
-  (set-bullet (make-instance 'axe) ply game))
+  (shoot axe ply game))
 
 ;;2way
 (define-class two-way (bullet)
@@ -76,8 +79,8 @@
   (when (zerop (life bul)) (setf (alive bul) nil)))
 
 (defun shot-two-way (ply game)
-  (set-bullet (make-instance 'two-way :vy -1) ply game)
-  (set-bullet (make-instance 'two-way :vy -2) ply game))
+  (shoot two-way ply game :vy -1)
+  (shoot two-way ply game :vy -2))
 
 ;;penetrate
 
@@ -93,7 +96,7 @@
   (when (zerop (life bul)) (setf (alive bul) nil)))
 
 (defun shot-penetrate (ply game)
-  (set-bullet (make-instance 'penetrate) ply game))
+  (shoot penetrate ply game))
 
 
 ;;javelin
@@ -111,7 +114,7 @@
   (when (zerop (life bul)) (setf (alive bul) nil)))
 
 (defun shot-javelin (ply game)
-  (set-bullet (make-instance 'javelin) ply game))
+  (shoot javelin ply game))
 
 ;;bomb
 
@@ -134,7 +137,7 @@
 
 
 (defun shot-bomb (ply game)
-  (set-bullet (make-instance 'bomb) ply game))
+  (shoot bomb ply game))
 
 (defun make-explosion (bul)
   (setf (image bul) (get-image :explosion))
@@ -182,6 +185,5 @@
 					(sqrt (+ (* dx dx) (* dy dy))))))))))
 
 (defun shot-boomerang (ply game)
-  (set-bullet (make-instance 'boomerang) ply game)
+  (shoot boomerang ply game)
   (setf (shot-cool ply) 100000))
-

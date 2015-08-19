@@ -1,9 +1,7 @@
 (in-package titechfes)
 
 ;------------------macro------------------
-(defmacro with-gensyms (lis &body body)
-  `(let (,@(mapcar (lambda (x) `(,x (gensym))) lis))
-     ,@body))
+
 
 (defmacro define-class (class-name parent  &rest res)
   `(defclass ,class-name ,parent
@@ -31,6 +29,13 @@
        ,@body)
      (defmethod ,method-name (,arg2 ,arg1)
        (,method-name ,(car arg1) ,(car arg2)))))
+
+(defmacro defcollide (arg1 arg2 &body body)
+  `(progn
+     (defmethod collide (,arg1 ,arg2 game)
+       ,@body)
+     (defmethod collide (,arg2 ,arg1 game)
+       ,@body)))
 
 (defun round-robin (fn lis)
   (mapl (lambda (xs) (mapcar (lambda (x) (funcall fn (car xs) x))

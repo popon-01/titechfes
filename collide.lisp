@@ -1,7 +1,9 @@
 (in-package titechfes)
 
+(defgeneric collide (obj-a obj-b game))
+(defcollide (obj-a gameobject) (obj-b gameobject))
 ;;player-behavior
-(definteract-method collide (ply player) (chip wall)
+(defcollide (ply player) (chip wall)
   (with-slots (vx vy
 		  in-air jump-cool
 		  dash-ok while-dash) ply
@@ -54,7 +56,7 @@
 				(truncate (height ply) 2)))
 			  (get-y ply)))))))))
 
-(definteract-method collide (ply player) (ebul enemy-bullet)
+(defcollide (ply player) (ebul enemy-bullet)
   (when (rect-collide ply ebul)
     (when (not (muteki ply))
       (decf (hp ply) (atk ebul))
@@ -63,7 +65,7 @@
     (setf (alive ebul) nil)))
 
 ;;enemy-behavior
-(definteract-method collide (enem enemy) (chip wall)
+(defcollide (enem enemy) (chip wall)
   (with-slots (vx vy) enem
     (sdl:with-rectangle (chip-rec (sdl:rectangle 
 				   :x (get-left (get-x chip) 
@@ -110,14 +112,14 @@
 			  (get-y enem)))))))))
 
 ;;enemy-bullet-behavior
-(definteract-method collide (ebul enemy-bullet) (chip wall)
+(defcollide (ebul enemy-bullet) (chip wall)
   (when (rect-collide ebul chip) (setf (alive ebul) nil)))
 
 ;;bullet-behavior
-(definteract-method collide (bul bullet) (chip wall)
+(defcollide (bul bullet) (chip wall)
   (when (rect-collide bul chip) (setf (alive bul) nil)))
 
-(definteract-method collide (enem enemy) (bul bullet)
+(defcollide (enem enemy) (bul bullet)
   (when (rect-collide enem bul)
     (when (not (muteki enem))
       (decf (hp enem) (atk bul))
@@ -125,27 +127,35 @@
 	    (muteki-count enem) *enemy-mutekitime*))
     (setf (alive bul) (penetrate bul))))
 
-(definteract-method collide (bul penetrate) (chip wall))
+(defcollide (bul penetrate) (chip wall))
 
-(definteract-method collide (bul bomb) (chip wall)
+(defcollide (bul bomb) (chip wall)
   (when (and (rect-collide bul chip) 
 	     (equal (state bul) "bomb"))
     (make-explosion bul)))
 
-(definteract-method collide (enem enemy) (bul bomb)
+(defcollide (enem enemy) (bul bomb)
   (when (rect-collide enem bul)
     (cond ((equal (state bul) "bomb") 
 	   (make-explosion bul))
 	  ((equal (state bul) "explosion")
 	   (decf (hp enem) (atk bul))))))
 
-(definteract-method collide (bul boomerang) (chip wall)
+(defcollide (bul boomerang) (chip wall)
   (when (and (rect-collide bul chip) 
 	     (equal (state bul) "go"))
     (setf (state bul) "back")))
 
-(definteract-method collide (bul boomerang) (ply player)
+(defcollide (bul boomerang) (ply player)
   (when (and (rect-collide bul ply)
 	     (equal (state bul) "back"))
     (setf (alive bul) nil
 	  (shot-cool ply) (cool-time bul))))
+
+(defcollide (item item) (p player)
+  (when (rect-collide item p) (kill item)))
+
+(defcollide (item weapon-item) (p player)
+  (when (rect-collide item p)
+    (change-bullet (weapon item) p)
+    (call-next-method)))
