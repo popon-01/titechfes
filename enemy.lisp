@@ -8,66 +8,29 @@
   (muteki-count 0))
 
 (defmethod update-object :before ((enem enemy) game)
-  (when (muteki enem)
-    (if (zerop (muteki-count enem))
-	(setf (muteki enem) nil)
-	(decf (muteki-count enem)))))
+  (if (and (muteki enem) (zerop  (muteki-count enem)))
+      (setf (muteki enem) nil)
+      (decf (muteki-count enem))))
 
 (defmethod draw-object :before ((enem enemy) game)
   (incf (get-x enem) (vx enem))
   (incf (get-y enem) (vy enem)))
 
-(definteract-method collide (enem enemy) (chip wall)
-  (with-slots (vx vy) enem
-    (sdl:with-rectangle (chip-rec (sdl:rectangle 
-				   :x (get-left (get-x chip) 
-						(width chip)) 
-				   :y (get-top (get-y chip)
-					       (height chip))
-				   :w (width chip)
-				   :h (height chip)))
-      ;;horizontal
-      (sdl:with-rectangle (enem-x-rec (sdl:rectangle 
-				      :x (get-left (+ (get-x enem) vx)
-						   (width enem))
-				      :y (get-top (get-y enem) 
-						  (height enem))
-				      :w (width enem)
-				      :h (height enem)))
-	(when (rect-collision-judge chip-rec enem-x-rec)
-	  (if (plusp vx)
-	      (setf vx (- (get-x chip) 
-			  (+ (truncate (width chip) 2)
-			     (truncate (width enem) 2))
-			  (get-x enem)))
-	      (setf vx (- (get-x chip)
-			  (- (+ (truncate (width chip) 2)
-				(truncate (width enem) 2))) 
-			  (get-x enem))))))
-      ;;vertical
-      (sdl:with-rectangle (enem-y-rec (sdl:rectangle 
-				       :x (get-left (get-x enem)
-						    (width enem))
-				       :y (get-top (+ (get-y enem) vy) 
-						   (height enem))
-				       :w (width enem)
-				       :h (height enem)))
-	(when (rect-collision-judge chip-rec enem-y-rec)
-	  (if (plusp vy)
-	      (setf vy (- (get-y chip)
-			  (+ (truncate (height chip) 2)
-			     (truncate (height enem) 2))
-			  (get-y enem)))
-	      (setf vy (- (get-y chip)
-			  (- (+ (truncate (height chip) 2)
-				(truncate (height enem) 2)))
-			  (get-y enem)))))))))
 
+(define-class enemy-bullet (gameobject)
+  (vx 0)
+  (vy 0)
+  (atk 0))
+
+(defmethod draw-object :before ((ebul enemy-bullet) game)
+  (incf (get-x ebul) (vx ebul))
+  (incf (get-y ebul) (vy ebul)))
 
 
 ;;aomura
 
 (define-class aomura (enemy)
+  (hp 200)
   (image-r (get-image :enemy-r))
   (image-l (get-image :enemy-l))
   (turn-routine 20)
@@ -88,3 +51,28 @@
 	   ((plusp jump-routine) (decf jump-routine)))
     (when (<= (hp enem) 0) (setf (alive enem) nil))))
 
+;;tullet
+
+(define-class tullet-bullet (enemy-bullet)
+  (image (get-image :ebul))
+  (vx -2)
+  (atk 10))
+
+(define-class tullet (enemy)
+  (image (get-image :enemy2-l))
+  (shot-routine 100))
+
+(defmethod update-object ((enem tullet) game)
+  (setf (vx enem) 0
+	(vy enem) 0)
+  (if (zerop (shot-routine enem))
+      (let ((ebul (make-instance 'tullet-bullet)))
+	(setf (get-x ebul) (- (get-x enem)
+			      (truncate (width enem) 2)
+			      (truncate (width ebul) 2))
+	      (get-y ebul) (get-y enem))
+	(push ebul (all-object game))
+	(push ebul (enemy-bullets game))
+	(setf (shot-routine enem) 100))
+      (decf (shot-routine enem)))
+  (when (<= (hp enem) 0) (setf (alive enem) nil)))

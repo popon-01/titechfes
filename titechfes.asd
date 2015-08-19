@@ -16,6 +16,7 @@
 	       (:file "bullet")
 	       (:file "enemy")
 	       (:file "player")
+	       (:file "collide")
 	       (:file "map")
 	       (:file "camera")
                (:file "titechfes"))

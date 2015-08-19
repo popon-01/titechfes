@@ -11,16 +11,6 @@
   (incf (get-x bul) (vx bul))
   (incf (get-y bul) (vy bul)))
 
-(definteract-method collide (bul bullet) (chip wall)
-  (when (rect-collide bul chip) (setf (alive bul) nil)))
-
-(definteract-method collide (enem enemy) (bul bullet)
-  (when (rect-collide enem bul)
-    (when (not (muteki enem))
-      (decf (hp enem) (atk bul))
-      (setf (muteki enem) t
-	    (muteki-count enem) *enemy-mutekitime*))
-    (setf (alive bul) (penetrate bul))))
 
 ;---template---
 ;(define-class name (bullet))
@@ -105,7 +95,6 @@
 (defun shot-penetrate (ply game)
   (set-bullet (make-instance 'penetrate) ply game))
 
-(definteract-method collide (bul penetrate) (chip wall))
 
 ;;javelin
 
@@ -156,17 +145,6 @@
 	(vy bul) 0
 	(atk bul) 50))
 
-(definteract-method collide (bul bomb) (chip wall)
-  (when (and (rect-collide bul chip) 
-	     (equal (state bul) "bomb"))
-    (make-explosion bul)))
-
-(definteract-method collide (enem enemy) (bul bomb)
-  (when (rect-collide enem bul)
-    (cond ((equal (state bul) "bomb") 
-	   (make-explosion bul))
-	  ((equal (state bul) "explosion")
-	   (decf (hp enem) (atk bul))))))
 
 ;;boomerang
 
@@ -174,7 +152,7 @@
   (image (get-image :knife))
   (atk 20)
   (life 30)
-  (cool-time 100000)
+  (cool-time 10)
   (vx 15)
   (penetrate t)
   (back-velocity 20)
@@ -204,15 +182,6 @@
 					(sqrt (+ (* dx dx) (* dy dy))))))))))
 
 (defun shot-boomerang (ply game)
-  (set-bullet (make-instance 'boomerang) ply game))
+  (set-bullet (make-instance 'boomerang) ply game)
+  (setf (shot-cool ply) 100000))
 
-(definteract-method collide (bul boomerang) (chip wall)
-  (when (and (rect-collide bul chip) 
-	     (equal (state bul) "go"))
-    (setf (state bul) "back")))
-
-(definteract-method collide (bul boomerang) (ply player)
-  (when (and (rect-collide bul ply)
-	     (equal (state bul) "back"))
-    (setf (alive bul) nil
-	  (shot-cool ply) 0)))

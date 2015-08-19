@@ -8,5 +8,6 @@
   (all-object nil)
   (mapchips nil)
   (enemies nil)
+  (enemy-bullets nil)
   (bullets nil)
   (keystate nil))

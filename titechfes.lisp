@@ -8,7 +8,10 @@
 	       '(:player-l "me2.png")
 	       '(:player-r "me.png")
 	       '(:enemy-l "enemy2.png")
-	       '(:enemy-r "enemy.png")))
+	       '(:enemy-r "enemy.png")
+	       '(:enemy2-l "minienemy2.png")
+	       '(:enemy2-r "minienemy1.png")
+	       '(:ebul "ebul.png")))
 
 
 (defun draw-info (game)
@@ -44,10 +47,8 @@
       (push (player game) (all-object game))
       (let ((map-objects (load-map (lib-path "map.txt") 
 				   game))
-	    (enem1 (make-instance 'aomura
-				  :x 300 :y 48 :vx 2
-				  :image (get-image 
-					  :enemy-l))))
+	    (enem1 (make-instance 'tullet
+				  :x 300 :y 244)))
 	(setf (all-object game)
 	      (nconc (all-object game) map-objects)
 	      (mapchips game)

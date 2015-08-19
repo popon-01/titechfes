@@ -17,7 +17,9 @@
   (shot-name "Knife")
   (shot-func #'shot-boomerang)
   (shot-cool 0)
-  (dir-right t))
+  (dir-right t)
+  (muteki nil)
+  (muteki-count 0))
 
 
 (defun player-keyevents (ply game)
@@ -55,13 +57,17 @@
 
 (defun player-flag-update (ply)
   (with-slots (vvx jump-cool dash-cool 
-		   shot-cool while-dash) ply
+		   shot-cool while-dash
+		   muteki muteki-count) ply
     (whens
       ((> jump-cool 0) (decf jump-cool))
       ((> dash-cool 0) (decf dash-cool))
       ((> shot-cool 0) (decf shot-cool)))
     (when (and while-dash (<= -5 vvx) (<= vvx 5))
-      (setf while-dash nil dash-cool 10))))
+      (setf while-dash nil dash-cool 10))
+    (if (and muteki (zerop muteki-count))
+	(setf muteki nil)
+	(decf muteki-count))))
 
 (defmethod update-object ((ply player) game)
   (with-slots (vx image image-r image-l dir-right) ply
@@ -76,55 +82,3 @@
   (incf (get-x ply) (vx ply))
   (incf (get-y ply) (vy ply)))
   
-(definteract-method collide (ply player) (chip wall)
-  (with-slots (vx vy
-		  in-air jump-cool
-		  dash-ok while-dash) ply
-    (sdl:with-rectangle (chip-rec (sdl:rectangle 
-				   :x (get-left (get-x chip) 
-						(width chip)) 
-				   :y (get-top (get-y chip)
-					       (height chip))
-				   :w (width chip)
-				   :h (height chip)))
-      ;;horizontal
-      (sdl:with-rectangle (ply-x-rec (sdl:rectangle 
-				      :x (get-left (+ (get-x ply) vx)
-						   (width ply))
-				      :y (get-top (get-y ply) 
-						  (height ply))
-				      :w (width ply)
-				      :h (height ply)))
-	(when (rect-collision-judge chip-rec ply-x-rec)
-	  (if (plusp vx)
-	      (setf vx (- (get-x chip) 
-			  (+ (truncate (width chip) 2)
-			     (truncate (width ply) 2))
-			  (get-x ply)))
-	      (setf vx (- (get-x chip)
-			  (- (+ (truncate (width chip) 2)
-				(truncate (width ply) 2))) 
-			  (get-x ply))))))
-      ;;vertical
-      (sdl:with-rectangle (ply-y-rec (sdl:rectangle
-				      :x (get-left (get-x ply)
-						   (width ply))
-				      :y (get-top (+ (get-y ply) vy)
-						  (height ply))
-				      :w (width ply)
-				      :h (height ply)))
-	(when (rect-collision-judge chip-rec ply-y-rec)
-	  (if (plusp vy)
-	      (progn (setf vy (- (get-y chip)
-				 (+ (truncate (height chip) 2)
-				    (truncate (height ply) 2))
-				 (get-y ply)))
-		     (whens (in-air
-			     (setf in-air nil
-				   jump-cool 10))
-			    ((and (not dash-ok) (not while-dash))
-			     (setf dash-ok t))))
-	      (setf vy (- (get-y chip)
-			  (- (+ (truncate (height chip) 2)
-				(truncate (height ply) 2)))
-			  (get-y ply)))))))))
