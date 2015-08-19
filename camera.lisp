@@ -1,6 +1,6 @@
 (in-package :titechfes)
 
-(defparameter *camera-move-position* 50)
+(defparameter *camera-move-position* 100)
 
 (defun init-camera (game)
   (setf (camera game) (list 0 0)))
@@ -11,10 +11,12 @@
 	(list 
 	 (alexandria:clamp  (+ (first (camera game)) dx)
 			    0
-			    (first (map-size game)))
+			    (- (first (map-size game))
+			       (first (window-size game))))
 	 (alexandria:clamp (+ (second (camera game)) dy)
-			   (- (second (map-size game)))
-			   0))))
+			   0
+			   (- (second (map-size game))
+			      (second (window-size game)))))))
 
 (defun coordinate-in-camera (coord game)
   (mapcar #'+ coord (camera game)))
@@ -42,3 +44,6 @@
 	   (camera-move 0 (- *camera-move-position*
 			     (- (second (window-size game))
 				py)) game)))))
+
+
+

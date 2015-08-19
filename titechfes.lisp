@@ -32,5 +32,4 @@
 		 (sdl:push-quit-event))
 	       (sdl:clear-display sdl:*black*)
 	       (draw-all game)
-	       (print (map-size game))
 	       (sdl:update-display))))))

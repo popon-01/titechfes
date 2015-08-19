@@ -15,7 +15,9 @@
 (defun make-game-object (code x y)
   (cond ((string= "1" code) (make-instance 'wall :x x :y y))
 	((string= "p" code) (make-instance 'player :x x :y y))
-	((string= "a" code) (make-instance 'aomura :x x :y y :vx 2))))
+	((string= "a" code) (make-instance 'aomura :x x :y y :vx 2))
+	((string= "i" code) (make-instance 'item :x x :y y))
+	((string= "m" code) (make-instance 'move-wall :x x :y y :vx 1))))
 
 (defmethod push-game-object ((obj null) game))
 (defmethod push-game-object ((obj gameobject) (game game))
