@@ -1,6 +1,6 @@
 (in-package :titechfes)
 
-(defparameter *camera-move-position* 100)
+(defparameter *camera-move-position* 240)
 
 (defun init-camera (game)
   (setf (camera game) (list 0 0)))
