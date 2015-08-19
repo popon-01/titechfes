@@ -10,4 +10,4 @@
   (enemies nil)
   (enemy-bullets nil)
   (bullets nil)
-  (keystate nil))
+  (keystate (make-instance 'titechfes-key)))

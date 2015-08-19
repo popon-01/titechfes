@@ -34,27 +34,8 @@
     (sdl:initialise-default-font  sdl:*font-9x18b*)
     (gameimage-load)
     (setf (sdl:frame-rate) 60)
-    (let ((game
-	   (make-instance 'game 
-	     :player 
-	     (make-instance 'player 
-		:x 48 
-		:y 48 
-		:image (get-image 
-			:player-l))
-	     :keystate 
-	     (make-instance 'titechfes-key))))
-      (push (player game) (all-object game))
-      (let ((map-objects (load-map (lib-path "map.txt") 
-				   game))
-	    (enem1 (make-instance 'tullet
-				  :x 300 :y 244)))
-	(setf (all-object game)
-	      (nconc (all-object game) map-objects)
-	      (mapchips game)
-	      (nconc (mapchips game) map-objects))
-	(push enem1 (all-object game))
-	(push enem1 (enemies game)))
+    (let ((game (make-instance 'game)))
+      (load-map (lib-path "map.txt") game)
       (init-camera game)
       (sdl:update-display)
       (sdl:with-events ()

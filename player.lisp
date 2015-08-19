@@ -2,6 +2,7 @@
 
 ;;;player
 (define-class player (gameobject)
+  (image (get-image :player-l))
   (image-r (get-image :player-r))
   (image-l (get-image :player-l))
   (max-hp 200)

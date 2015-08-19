@@ -31,6 +31,7 @@
 
 (define-class aomura (enemy)
   (hp 200)
+  (image (get-image :enemy-l))
   (image-r (get-image :enemy-r))
   (image-l (get-image :enemy-l))
   (turn-routine 20)
