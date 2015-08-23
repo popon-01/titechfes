@@ -7,10 +7,6 @@
   (penetrate nil)
   (cool-time 0))
 
-(defmethod draw-object :before ((bul bullet) game)
-  (incf (get-x bul) (vx bul))
-  (incf (get-y bul) (vy bul)))
-
 
 ;---template---
 ;(define-class name (bullet))
@@ -23,16 +19,13 @@
 (defun set-bullet (instance ply game)
   (let ((bul instance))
     (when (not (dir-right ply)) (setf (vx bul) (- (vx bul))))
-    (setf (get-x bul) (if (dir-right ply)
-			  (+ (get-x ply)
-			     (truncate (width ply) 2) 
-			     (truncate (width bul) 2))
-			  (- (get-x ply)
-			     (truncate (width ply) 2) 
-			     (truncate (width bul) 2)))
+    (setf (get-x bul) 
+	  (funcall (if (dir-right ply) #'+ #'-)
+		   (get-x ply)
+		   (truncate (width ply) 2)
+		   (truncate (width bul) 2))
 	  (get-y bul) (get-y ply))
-    (push bul (all-object game))
-    (push bul (bullets game))
+    (push-game-object bul game)
     (setf (shot-cool ply) (cool-time bul))))
 
 ;;;knife
@@ -133,7 +126,7 @@
 	 (when (> (vy bul) 10) (setf (vy bul) 10)))
 	((equal (state bul) "explosion")
 	 (decf (life bul))
-	 (when (zerop (life bul)) (setf (alive bul) nil)))))
+	 (when (zerop (life bul)) (kill bul)))))
 
 
 (defun shot-bomb (ply game)

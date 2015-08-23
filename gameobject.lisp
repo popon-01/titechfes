@@ -20,6 +20,8 @@
 (define-class gameobject ()
   (x 0 get-x)
   (y 0 get-y)
+  (vx 0)
+  (vy 0)
   width
   height
   (alive t)
@@ -30,6 +32,10 @@
     (setf width (sdl:width image)
 	  height (sdl:height image))))
 
+(defmethod draw-object :before ((obj gameobject) game)
+  (incf (get-x obj) (vx obj))
+  (incf (get-y obj) (vy obj)))
+
 (defmethod draw-object ((obj gameobject) game)
   (with-slots (x y width height image) obj
     (sdl:draw-surface-at-* image
@@ -37,43 +43,10 @@
 			      (/ width 2))
 			   (- (y-in-camera y game) 
 			      (/ height 2)))))
+
 (defmethod update-object ((obj gameobject) game))
 
 (defmethod kill ((obj gameobject)) (setf (alive obj) nil))
-;;;wall
-(define-class wall (gameobject)
-  (image (get-image :wall)))
-
-(define-class move-wall (wall)
-  (vx 0) (vy 0) frame
-  (routine 120)
-  (stop-frame 0))
-(defmethod initialize-instance :after ((wall move-wall) &key)
-  (setf (frame wall) (routine wall)))
-
-(defmethod update-object ((wall move-wall) (game game))
-  (when (plusp (stop-frame wall))
-    (decf (stop-frame wall))
-    (return-from update-object))
-  (incf (get-x wall) (vx wall))
-  (incf (get-y wall) (vy wall))
-  (decf (frame wall))
-  (when (zerop (frame wall))
-    (setf (vx wall) (- (vx wall))
-	  (vy wall) (- (vy wall))
-	  (frame wall) (routine wall)
-	  (stop-frame wall) 10)))
-
-(define-class damage-wall (wall)
-  (atk 60))
-(defmethod draw-object ((wall damage-wall) game)
-  (call-next-method)
-  (with-accessors ((x get-x) (y get-y) (w width) (h height))
-      wall
-    (let* ((cx (x-in-camera x game))
-	   (cy (y-in-camera y game)))
-      (sdl:draw-box-* (- cx (ash w -1)) (- cy (ash h -1) 10) 32 10
-			       :color sdl:*red*))))
 
 ;------------------collide------------------
 (defgeneric rect-collide (a b))
@@ -92,7 +65,7 @@
   (and (<= (- (get-x a) (/ (width a) 2))
 	   (+ (get-x b) (/ (width b) 2)))
        (<= (- (get-x b) (/ (width b) 2))
-	   (+ i(get-x a) (/ (width a) 2)))
+	   (+ (get-x a) (/ (width a) 2)))
        (<= (- (get-y a) (/ (height a) 2))
 	   (+ (get-y b) (/ (height b) 2)))
        (<= (- (get-y b) (/ (height b) 2))

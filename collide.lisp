@@ -5,7 +5,7 @@
 ;;player-behavior
 (defcollide (ply player) (chip wall)
   (with-slots (vx vy
-		  in-air jump-cool
+		  in-air jump-cool jump-recovery
 		  dash-ok while-dash) ply
     (sdl:with-rectangle (chip-rec (sdl:rectangle 
 				   :x (get-left (get-x chip) 
@@ -48,7 +48,7 @@
 				 (get-y ply)))
 		     (whens (in-air
 			     (setf in-air nil
-				   jump-cool 10))
+				   jump-cool jump-recovery))
 			    ((and (not dash-ok) (not while-dash))
 			     (setf dash-ok t))))
 	      (setf vy (- (get-y chip)
@@ -58,10 +58,7 @@
 
 (defcollide (ply player) (ebul enemy-bullet)
   (when (rect-collide ply ebul)
-    (when (not (muteki ply))
-      (decf (hp ply) (atk ebul))
-      (setf (muteki ply) t
-	    (muteki-count ply) *player-mutekitime*))
+    (attack ebul ply)
     (setf (alive ebul) nil)))
 
 ;;enemy-behavior
@@ -114,25 +111,45 @@
 (defcollide (wall damage-wall) (player player)
   (call-next-method)
   (when (rect-collide= player wall)
-    (when (not (muteki player))
-      (decf (hp player) (atk wall))
-      (setf (muteki player) t
-	    (muteki-count player) *player-mutekitime*))))
+    (attack wall player)))
+
+(defcollide (wall break-wall) (bullet bullet)
+  (when (rect-collide wall bullet)
+    (call-next-method)
+    (attack bullet wall)))
+
+(defcollide (wall break-wall) (bullet penetrate)
+  (when (rect-collide wall bullet)
+    (attack bullet wall)))
+(defcollide (wall break-wall) (bomb bomb)
+  (call-next-method)
+  (when (and (rect-collide wall bomb)
+	     (string= (state bomb) "explosion"))
+    (attack bomb wall)))
+
+(defcollide (wall easy-break-wall) (player player)
+  (call-next-method)
+  (when (and (rect-collide= wall player)
+	     (< (abs (- (get-x wall) (get-x player)))
+		(ash (+ (width wall) (width player)) -1))
+	     (or (and (in-air player) (<= (vy player) 0)
+		      (< (get-y wall) (get-y player)))
+		 (and (= (1+ (jump-cool player) )
+			 (jump-recovery player))
+		      (< (get-y player) (get-y wall)))))
+    (attack 10 wall)))
 
 ;;enemy-bullet-behavior
 (defcollide (ebul enemy-bullet) (chip wall)
-  (when (rect-collide ebul chip) (setf (alive ebul) nil)))
+  (when (rect-collide ebul chip) (kill ebul)))
 
 ;;bullet-behavior
 (defcollide (bul bullet) (chip wall)
-  (when (rect-collide bul chip) (setf (alive bul) nil)))
+  (when (rect-collide bul chip) (kill bul)))
 
 (defcollide (enem enemy) (bul bullet)
   (when (rect-collide enem bul)
-    (when (not (muteki enem))
-      (decf (hp enem) (atk bul))
-      (setf (muteki enem) t
-	    (muteki-count enem) *enemy-mutekitime*))
+    (attack bul enem)
     (setf (alive bul) (penetrate bul))))
 
 (defcollide (bul penetrate) (chip wall))
@@ -140,7 +157,7 @@
 (defcollide (bul bomb) (chip wall)
   (when (and (rect-collide bul chip) 
 	     (equal (state bul) "bomb"))
-    (make-explosion bul)))
+      (make-explosion bul)))
 
 (defcollide (enem enemy) (bul bomb)
   (when (rect-collide enem bul)

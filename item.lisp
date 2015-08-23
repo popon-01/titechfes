@@ -26,3 +26,15 @@
 			game)
   (setf (hp player) (clamp (+ (heal item) (hp player))
 			   0 (max-hp player))))
+
+(define-class score-item (item)
+  (point 50))
+(defmethod draw-object ((item score-item) game)
+  (sdl:draw-filled-circle-* (x-in-camera (get-x item) game)
+			    (y-in-camera (get-y item) game)
+			    10
+			    :color sdl:*yellow*))
+
+(defmethod item-effect ((item score-item) (player player)
+			game)
+  (incf (score player) (point item)))

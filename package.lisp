@@ -2,7 +2,8 @@
 
 (defpackage :titechfes
   (:use :cl :split-sequence :iterate :alexandria)
-  (:export main))
+  (:export run))
+
 
 
 

@@ -30,7 +30,10 @@
    ("e" 'weapon-item :weapon 'bomb)
    ("+" 'weapon-item :weapon 'boomerang)
    ("2" 'damage-wall)
-   ("r" 'recovery-item)))
+   ("3" 'break-wall)
+   ("4" 'easy-break-wall)
+   ("r" 'recovery-item)
+   ("c" 'score-item)))
 
 (defmethod push-game-object ((obj null) game))
 (defmethod push-game-object ((obj gameobject) (game game))
@@ -48,5 +51,6 @@
   (push e (enemies game))
   (call-next-method))
 
-
-
+(defmethod push-game-object ((b bullet) (game game))
+  (push b (bullets game))
+  (call-next-method))

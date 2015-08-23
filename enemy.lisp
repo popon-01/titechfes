@@ -1,31 +1,17 @@
 (in-package titechfes)
 
-(define-class enemy (gameobject)
-  (vx 0)
-  (vy 0)
+(define-class enemy (gamecharacter)
   (hp 100)
   (muteki nil)
   (muteki-count 0))
 
-(defmethod update-object :before ((enem enemy) game)
-  (if (and (muteki enem) (zerop  (muteki-count enem)))
-      (setf (muteki enem) nil)
-      (decf (muteki-count enem))))
-
-(defmethod draw-object :before ((enem enemy) game)
-  (incf (get-x enem) (vx enem))
-  (incf (get-y enem) (vy enem)))
-
+(defmethod update-object ((enem enemy) game)
+  (dec-muteki-frame enem))
 
 (define-class enemy-bullet (gameobject)
   (vx 0)
   (vy 0)
   (atk 0))
-
-(defmethod draw-object :before ((ebul enemy-bullet) game)
-  (incf (get-x ebul) (vx ebul))
-  (incf (get-y ebul) (vy ebul)))
-
 
 ;;aomura
 
@@ -50,7 +36,7 @@
 		  jump-routine 75)))
     (whens ((plusp turn-routine) (decf turn-routine))
 	   ((plusp jump-routine) (decf jump-routine)))
-    (when (<= (hp enem) 0) (setf (alive enem) nil))))
+    (alive-detect enem)))
 
 ;;tullet
 
@@ -76,4 +62,4 @@
 	(push ebul (enemy-bullets game))
 	(setf (shot-routine enem) 100))
       (decf (shot-routine enem)))
-  (when (<= (hp enem) 0) (setf (alive enem) nil)))
+  (alive-detect enem))
