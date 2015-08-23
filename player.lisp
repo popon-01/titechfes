@@ -7,9 +7,8 @@
   (image-l (get-image :player-l))
   (max-hp 200)
   (hp 200)
-  (vx 0)
-  (vvx 0)
-  (vy 0)
+  (dx 0) (vx 0) (vvx 0)
+  (dy 0) (vy 0)
   (in-air t)
   (jump-cool 0)
   (dash-ok t)
@@ -47,14 +46,15 @@
 	   (setf alive nil))))))
 
 (defun player-accelerarion (ply)
-  (with-slots  (vx vy vvx while-dash) ply
+  (with-slots  (dx dy vx vy vvx while-dash) ply
     (if while-dash (setf vy 0) (incf vy *gravity*))
     (when (> vy 10) (setf vy 10))
     (whens ((< vvx 0) (incf vvx 2))
 	   ((> vvx 0) (decf vvx 2)))
     (cond ((> vvx 10) (incf vx 10))
 	  ((< vvx -10) (incf vx -10))
-	  (t (incf vx vvx)))))
+	  (t (incf vx vvx)))
+    (setf dx vx dy vy)))
 
 (defun player-flag-update (ply)
   (with-slots (vvx jump-cool dash-cool 
@@ -80,8 +80,8 @@
     (player-flag-update ply)))
 
 (defmethod draw-object :before ((ply player) game)
-  (incf (get-x ply) (vx ply))
-  (incf (get-y ply) (vy ply)))
+  (incf (get-x ply) (dx ply))
+  (incf (get-y ply) (dy ply)))
   
 (defmethod change-bullet (bsym (player player))
   (setf (shot-name player)

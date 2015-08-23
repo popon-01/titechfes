@@ -1,9 +1,10 @@
 (in-package titechfes)
 
 (define-class enemy (gameobject)
-  (vx 0)
-  (vy 0)
+  (dx 0) (vx 0)
+  (dy 0) (vy 0)
   (hp 100)
+  (dir-right t)
   (muteki nil)
   (muteki-count 0))
 
@@ -13,8 +14,8 @@
       (decf (muteki-count enem))))
 
 (defmethod draw-object :before ((enem enemy) game)
-  (incf (get-x enem) (vx enem))
-  (incf (get-y enem) (vy enem)))
+  (incf (get-x enem) (dx enem))
+  (incf (get-y enem) (dy enem)))
 
 
 (define-class enemy-bullet (gameobject)
@@ -48,6 +49,7 @@
 	   ((zerop jump-routine)
 	    (setf (vy enem) -16
 		  jump-routine 75)))
+    (setf (dx enem) (vx enem) (dy enem) (vy enem))
     (whens ((plusp turn-routine) (decf turn-routine))
 	   ((plusp jump-routine) (decf jump-routine)))
     (when (<= (hp enem) 0) (setf (alive enem) nil))))

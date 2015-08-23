@@ -18,8 +18,8 @@
 
 ;;gameobject
 (define-class gameobject ()
-  (x 0 get-x)
-  (y 0 get-y)
+  (x 0 get-x) (vx 0)
+  (y 0 get-y) (vy 0)
   width
   height
   (alive t)
@@ -78,10 +78,10 @@
        (< (- (get-y b) (/ (height b) 2))
 	  (+ (get-y a) (/ (height a) 2)))))
 
-(defun get-left (px w)
-  (- px (truncate w 2)))
-(defun get-top (py h)
-  (- py (truncate h 2)))
+(defun get-left (obj)
+  (- (get-x obj) (truncate (width obj) 2)))
+(defun get-top (obj)
+  (- (get-y obj) (truncate (height obj) 2)))
 
 (defun rect-collision-judge (rec1 rec2)
   (and (< (sdl:x rec1) (sdl:x2 rec2))

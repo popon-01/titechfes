@@ -1,60 +1,59 @@
 (in-package titechfes)
 
+(defun try-move (obj1 obj2 &key (dx1 0) (dy1 0) (dx2 0) (dy2 0))
+  (sdl:with-rectangle (obj1-rec (sdl:rectangle 
+				   :x (+ (get-left obj1) dx1) 
+				   :y (+ (get-top obj1) dy1)
+				   :w (width obj1)
+				   :h (height obj1)))
+    (sdl:with-rectangle (obj2-rec (sdl:rectangle 
+				    :x (+ (get-left obj2) dx2)
+				    :y (+ (get-top obj2) dy2)
+				    :w (width obj2)
+				    :h (height obj2)))
+      (not (rect-collision-judge obj1-rec obj2-rec)))))
+
+(defun adjust-dx (move-obj obj2)
+  (setf (dx move-obj) (- (get-x obj2)
+			 (if (plusp (- (get-x obj2) (get-x move-obj)))
+			     (+ (truncate (width obj2) 2)
+				(truncate (width move-obj) 2))
+			     (- (+ (truncate (width obj2) 2)
+				   (truncate (width move-obj) 2))))
+			 (get-x move-obj))))
+
+(defun adjust-dy (move-obj obj2)
+  (setf (dy move-obj) (- (get-y obj2)
+			 (if (plusp (- (get-y obj2) (get-y move-obj)))
+			     (+ (truncate (height obj2) 2)
+				(truncate (height move-obj) 2))
+			     (- (+ (truncate (height obj2) 2)
+				   (truncate (height move-obj) 2))))
+			 (get-y move-obj))))
+
+
 (defgeneric collide (obj-a obj-b game))
 (defcollide (obj-a gameobject) (obj-b gameobject))
+
 ;;player-behavior
+
+(defun player-landed (ply)
+  (whens ((and (in-air ply))
+	  (setf (in-air ply) nil
+		(jump-cool ply) 10))
+	 ((and (not (dash-ok ply)) (not (while-dash ply)))
+	  (setf (dash-ok ply) t))))
+
 (defcollide (ply player) (chip wall)
-  (with-slots (vx vy
-		  in-air jump-cool
-		  dash-ok while-dash) ply
-    (sdl:with-rectangle (chip-rec (sdl:rectangle 
-				   :x (get-left (get-x chip) 
-						(width chip)) 
-				   :y (get-top (get-y chip)
-					       (height chip))
-				   :w (width chip)
-				   :h (height chip)))
-      ;;horizontal
-      (sdl:with-rectangle (ply-x-rec (sdl:rectangle 
-				      :x (get-left (+ (get-x ply) vx)
-						   (width ply))
-				      :y (get-top (get-y ply) 
-						  (height ply))
-				      :w (width ply)
-				      :h (height ply)))
-	(when (rect-collision-judge chip-rec ply-x-rec)
-	  (if (plusp vx)
-	      (setf vx (- (get-x chip) 
-			  (+ (truncate (width chip) 2)
-			     (truncate (width ply) 2))
-			  (get-x ply)))
-	      (setf vx (- (get-x chip)
-			  (- (+ (truncate (width chip) 2)
-				(truncate (width ply) 2))) 
-			  (get-x ply))))))
-      ;;vertical
-      (sdl:with-rectangle (ply-y-rec (sdl:rectangle
-				      :x (get-left (get-x ply)
-						   (width ply))
-				      :y (get-top (+ (get-y ply) vy)
-						  (height ply))
-				      :w (width ply)
-				      :h (height ply)))
-	(when (rect-collision-judge chip-rec ply-y-rec)
-	  (if (plusp vy)
-	      (progn (setf vy (- (get-y chip)
-				 (+ (truncate (height chip) 2)
-				    (truncate (height ply) 2))
-				 (get-y ply)))
-		     (whens (in-air
-			     (setf in-air nil
-				   jump-cool 10))
-			    ((and (not dash-ok) (not while-dash))
-			     (setf dash-ok t))))
-	      (setf vy (- (get-y chip)
-			  (- (+ (truncate (height chip) 2)
-				(truncate (height ply) 2)))
-			  (get-y ply)))))))))
+  (with-slots (dx dy) ply
+    (when (not (try-move ply chip :dx1 dx :dy1 dy))
+      (let ((dir-x (- (get-x chip) (get-x ply)))
+	    (dir-y (- (get-y chip) (get-y ply))))
+	(if (< (abs dir-x) (abs dir-y))
+	    (progn
+	      (if (plusp dy) (player-landed ply))
+	      (adjust-dy ply chip))
+	    (adjust-dx ply chip))))))
 
 (defcollide (ply player) (ebul enemy-bullet)
   (when (rect-collide ply ebul)
@@ -66,50 +65,13 @@
 
 ;;enemy-behavior
 (defcollide (enem enemy) (chip wall)
-  (with-slots (vx vy) enem
-    (sdl:with-rectangle (chip-rec (sdl:rectangle 
-				   :x (get-left (get-x chip) 
-						(width chip)) 
-				   :y (get-top (get-y chip)
-					       (height chip))
-				   :w (width chip)
-				   :h (height chip)))
-      ;;horizontal
-      (sdl:with-rectangle (enem-x-rec (sdl:rectangle 
-				      :x (get-left (+ (get-x enem) vx)
-						   (width enem))
-				      :y (get-top (get-y enem) 
-						  (height enem))
-				      :w (width enem)
-				      :h (height enem)))
-	(when (rect-collision-judge chip-rec enem-x-rec)
-	  (if (plusp vx)
-	      (setf vx (- (get-x chip) 
-			  (+ (truncate (width chip) 2)
-			     (truncate (width enem) 2))
-			  (get-x enem)))
-	      (setf vx (- (get-x chip)
-			  (- (+ (truncate (width chip) 2)
-				(truncate (width enem) 2))) 
-			  (get-x enem))))))
-      ;;vertical
-      (sdl:with-rectangle (enem-y-rec (sdl:rectangle 
-				       :x (get-left (get-x enem)
-						    (width enem))
-				       :y (get-top (+ (get-y enem) vy) 
-						   (height enem))
-				       :w (width enem)
-				       :h (height enem)))
-	(when (rect-collision-judge chip-rec enem-y-rec)
-	  (if (plusp vy)
-	      (setf vy (- (get-y chip)
-			  (+ (truncate (height chip) 2)
-			     (truncate (height enem) 2))
-			  (get-y enem)))
-	      (setf vy (- (get-y chip)
-			  (- (+ (truncate (height chip) 2)
-				(truncate (height enem) 2)))
-			  (get-y enem)))))))))
+  (with-slots (dx dy) enem
+    (when (not (try-move enem chip :dx1 dx :dy1 dy))
+      (let ((dir-x (- (get-x chip) (get-x enem)))
+	    (dir-y (- (get-y chip) (get-y enem))))
+	(if (< (abs dir-x) (abs dir-y))
+	    (adjust-dy enem chip)
+	    (adjust-dx enem chip))))))
 
 ;;enemy-bullet-behavior
 (defcollide (ebul enemy-bullet) (chip wall)
