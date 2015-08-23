@@ -63,7 +63,17 @@
 	  (vy wall) (- (vy wall))
 	  (frame wall) (routine wall)
 	  (stop-frame wall) 10)))
-  
+
+(define-class damage-wall (wall)
+  (atk 60))
+(defmethod draw-object ((wall damage-wall) game)
+  (call-next-method)
+  (with-accessors ((x get-x) (y get-y) (w width) (h height))
+      wall
+    (let* ((cx (x-in-camera x game))
+	   (cy (y-in-camera y game)))
+      (sdl:draw-box-* (- cx (ash w -1)) (- cy (ash h -1) 10) 32 10
+			       :color sdl:*red*))))
 
 ;------------------collide------------------
 (defgeneric rect-collide (a b))
@@ -77,6 +87,16 @@
 	  (+ (get-y b) (/ (height b) 2)))
        (< (- (get-y b) (/ (height b) 2))
 	  (+ (get-y a) (/ (height a) 2)))))
+
+(defmethod rect-collide= (a b)
+  (and (<= (- (get-x a) (/ (width a) 2))
+	   (+ (get-x b) (/ (width b) 2)))
+       (<= (- (get-x b) (/ (width b) 2))
+	   (+ i(get-x a) (/ (width a) 2)))
+       (<= (- (get-y a) (/ (height a) 2))
+	   (+ (get-y b) (/ (height b) 2)))
+       (<= (- (get-y b) (/ (height b) 2))
+	   (+ (get-y a) (/ (height a) 2)))))
 
 (defun get-left (px w)
   (- px (truncate w 2)))

@@ -111,6 +111,14 @@
 				(truncate (height enem) 2)))
 			  (get-y enem)))))))))
 
+(defcollide (wall damage-wall) (player player)
+  (call-next-method)
+  (when (rect-collide= player wall)
+    (when (not (muteki player))
+      (decf (hp player) (atk wall))
+      (setf (muteki player) t
+	    (muteki-count player) *player-mutekitime*))))
+
 ;;enemy-bullet-behavior
 (defcollide (ebul enemy-bullet) (chip wall)
   (when (rect-collide ebul chip) (setf (alive ebul) nil)))
@@ -153,9 +161,8 @@
 	  (shot-cool ply) (cool-time bul))))
 
 (defcollide (item item) (p player)
-  (when (rect-collide item p) (kill item)))
+  (when (rect-collide item p) 
+    (item-effect item p game)
+    (kill item)))
 
-(defcollide (item weapon-item) (p player)
-  (when (rect-collide item p)
-    (change-bullet (weapon item) p)
-    (call-next-method)))
+
