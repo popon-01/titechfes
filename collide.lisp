@@ -31,6 +31,14 @@
 				   (truncate (height move-obj) 2))))
 			 (get-y move-obj))))
 
+(defgeneric set-muteki (obj))
+(defmethod set-muteki ((ply player))
+  (setf (muteki ply) t
+	(muteki-count ply) *player-mutekitime*))
+(defmethod set-muteki ((enem enemy))
+  (setf (muteki enem) t
+	(muteki-count enem) *enemy-mutekitime*))
+
 
 (defgeneric collide (obj-a obj-b game))
 (defcollide (obj-a gameobject) (obj-b gameobject))
@@ -38,11 +46,10 @@
 ;;player-behavior
 
 (defun player-landed (ply)
-  (whens ((and (in-air ply))
-	  (setf (in-air ply) nil
-		(jump-cool ply) 10))
-	 ((and (not (dash-ok ply)) (not (while-dash ply)))
-	  (setf (dash-ok ply) t))))
+  (setf (in-air ply) nil
+	(jump-count ply) (max-jump ply)
+	(dash-count ply) (max-dash ply)
+	(dash-cooltime ply) 40))
 
 (defcollide (ply player) (chip wall)
   (with-slots (dx dy) ply
@@ -55,12 +62,19 @@
 	      (adjust-dy ply chip))
 	    (adjust-dx ply chip))))))
 
+(defcollide (ply player) (enem enemy)
+  (when (and (rect-collide ply enem) (not (muteki ply)))
+    (decf (hp ply) (atk enem))
+    (set-muteki ply)
+    (incf (vy ply) -15)
+    (incf (vvx ply) (if (plusp (- (get-x ply) (get-x enem)))
+		       15 -15))))
+
 (defcollide (ply player) (ebul enemy-bullet)
   (when (rect-collide ply ebul)
     (when (not (muteki ply))
       (decf (hp ply) (atk ebul))
-      (setf (muteki ply) t
-	    (muteki-count ply) *player-mutekitime*))
+      (set-muteki ply))
     (setf (alive ebul) nil)))
 
 ;;enemy-behavior
@@ -79,14 +93,13 @@
 
 ;;bullet-behavior
 (defcollide (bul bullet) (chip wall)
-  (when (rect-collide bul chip) (setf (alive bul) nil)))
+  (when (rect-collide bul chip) (kill bul)))
 
 (defcollide (enem enemy) (bul bullet)
   (when (rect-collide enem bul)
     (when (not (muteki enem))
       (decf (hp enem) (atk bul))
-      (setf (muteki enem) t
-	    (muteki-count enem) *enemy-mutekitime*))
+      (set-muteki enem))
     (setf (alive bul) (penetrate bul))))
 
 (defcollide (bul penetrate) (chip wall))

@@ -4,6 +4,7 @@
   (dx 0) (vx 0)
   (dy 0) (vy 0)
   (hp 100)
+  (atk 0)
   (dir-right t)
   (muteki nil)
   (muteki-count 0))
@@ -11,7 +12,8 @@
 (defmethod update-object :before ((enem enemy) game)
   (if (and (muteki enem) (zerop  (muteki-count enem)))
       (setf (muteki enem) nil)
-      (decf (muteki-count enem))))
+      (decf (muteki-count enem)))
+  (when (<= (hp enem) 0) (kill enem)))
 
 (defmethod draw-object :before ((enem enemy) game)
   (incf (get-x enem) (dx enem))
@@ -32,6 +34,7 @@
 
 (define-class aomura (enemy)
   (hp 200)
+  (atk 20)
   (image (get-image :enemy-l))
   (image-r (get-image :enemy-r))
   (image-l (get-image :enemy-l))
@@ -51,8 +54,7 @@
 		  jump-routine 75)))
     (setf (dx enem) (vx enem) (dy enem) (vy enem))
     (whens ((plusp turn-routine) (decf turn-routine))
-	   ((plusp jump-routine) (decf jump-routine)))
-    (when (<= (hp enem) 0) (setf (alive enem) nil))))
+	   ((plusp jump-routine) (decf jump-routine)))))
 
 ;;tullet
 
@@ -63,6 +65,7 @@
 
 (define-class tullet (enemy)
   (image (get-image :enemy2-l))
+  (atk 20)
   (shot-routine 100))
 
 (defmethod update-object ((enem tullet) game)
@@ -77,5 +80,4 @@
 	(push ebul (all-object game))
 	(push ebul (enemy-bullets game))
 	(setf (shot-routine enem) 100))
-      (decf (shot-routine enem)))
-  (when (<= (hp enem) 0) (setf (alive enem) nil)))
+      (decf (shot-routine enem))))

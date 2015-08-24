@@ -18,6 +18,8 @@
 	 (make-instance 'player :x x :y y))
 	((string= "a" code) 
 	 (make-instance 'aomura :x x :y y :vx 2))
+	((string= "t" code)
+	 (make-instance 'tullet :x x :y y))
 	((string= "i" code) (make-instance 'item :x x :y y))
 	((string= "m" code) 
 	 (make-instance 'move-wall :x x :y y :vx 1))

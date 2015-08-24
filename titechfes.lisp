@@ -16,8 +16,10 @@
 
 (defun draw-info (game)
   (sdl:draw-box-* 180 15 100 10 :color sdl:*red*)
-  (sdl:draw-box-* 180 15 (truncate (* (hp (player game)) 100)
-					 (max-hp (player game))) 10 
+  (sdl:draw-box-* 180 15 (if (>= (hp (player game)) 0)
+			     (truncate (* (hp (player game)) 100)
+					 (max-hp (player game)))
+			     0) 10 
 					 :color sdl:*green*)
   (sdl:draw-string-solid-* "hp" 160 10 )
   (sdl:draw-string-solid-* (format nil "~D" 

@@ -7,13 +7,17 @@
   (image-l (get-image :player-l))
   (max-hp 200)
   (hp 200)
+  (velocity 3)
   (dx 0) (vx 0) (vvx 0)
   (dy 0) (vy 0)
   (in-air t)
-  (jump-cool 0)
-  (dash-ok t)
+  (jump-cool 0) (jump-cooltime 20)
+  (jump-count 1) (max-jump 2)
+  (jump-accel -16)
   (while-dash nil)
-  (dash-cool 0)
+  (dash-cool 0) (dash-cooltime 20)
+  (dash-count 1) (max-dash 2)
+  (dash-accel 20)
   (shot-name "Knife")
   (shot-func #'shot-knife)
   (shot-cool 0)
@@ -23,8 +27,12 @@
 
 
 (defun player-keyevents (ply game)
-  (with-slots (vx vy vvx in-air jump-cool
-		  dash-ok while-dash dash-cool
+  (with-slots (vx vy vvx velocity 
+		  jump-count jump-accel
+		  jump-cool jump-cooltime
+		  while-dash
+		  dash-count dash-accel
+		  dash-cool dash-cooltime
 		  shot-func shot-cool
 		  dir-right alive) ply
       (with-slots (right left jump down shot dash) (keystate game)
@@ -32,43 +40,52 @@
 	  ((and shot (zerop shot-cool))
 	   (funcall shot-func ply game))
 	  ((and left (not while-dash)) 
-	   (decf vx 3) (setf dir-right nil))
+	   (decf vx velocity) (setf dir-right nil))
 	  ((and right (not while-dash))
-	   (incf vx 3) (setf dir-right t))
-	  ((and jump (not in-air) (zerop jump-cool))
-	   (setf in-air t
-		 vy -16))
-	  ((and dash dash-ok (zerop dash-cool))
+	   (incf vx velocity) (setf dir-right t))
+	  ((and jump (plusp jump-count) (zerop jump-cool))
+	   (setf while-dash nil 
+		 jump-cool jump-cooltime
+		 vy jump-accel)
+	   (decf jump-count))
+	  ((and dash (plusp dash-count) (zerop dash-cool))
 	   (setf while-dash t
-		 dash-ok nil
-		 vvx (if dir-right 20 -20)))
-	  (down 
-	   (setf alive nil))))))
+		 dash-cool dash-cooltime
+		 vvx (if dir-right dash-accel (- dash-accel)))
+	   (decf dash-count))))))
 
 (defun player-accelerarion (ply)
   (with-slots  (dx dy vx vy vvx while-dash) ply
-    (if while-dash (setf vy 0) (incf vy *gravity*))
+    (incf vy *gravity*)
+    (when (and while-dash (plusp vy)) (setf vy 0)) 
     (when (> vy 10) (setf vy 10))
-    (whens ((< vvx 0) (incf vvx 2))
-	   ((> vvx 0) (decf vvx 2)))
+    (whens ((< vvx 0) (setf vvx (min (+ vvx 2) 0)))
+	   ((> vvx 0) (setf vvx (max (- vvx 2) 0))))
     (cond ((> vvx 10) (incf vx 10))
 	  ((< vvx -10) (incf vx -10))
 	  (t (incf vx vvx)))
     (setf dx vx dy vy)))
 
 (defun player-flag-update (ply)
-  (with-slots (vvx jump-cool dash-cool 
-		   shot-cool while-dash
+  (with-slots (vvx velocity in-air
+		   jump-cool shot-cool
+		   dash-cool dash-cooltime while-dash  
 		   muteki muteki-count) ply
+    (setf in-air t
+	  dash-cooltime 20)
+    (when (equal (jump-count ply) (max-jump ply))
+      (decf (jump-count ply)))
     (whens
       ((> jump-cool 0) (decf jump-cool))
       ((> dash-cool 0) (decf dash-cool))
       ((> shot-cool 0) (decf shot-cool)))
-    (when (and while-dash (<= -5 vvx) (<= vvx 5))
-      (setf while-dash nil dash-cool 10))
+    (when (and (<= (- velocity) vvx) 
+	       (<= vvx velocity))
+      (setf while-dash nil))
     (if (and muteki (zerop muteki-count))
 	(setf muteki nil)
-	(decf muteki-count))))
+	(decf muteki-count))
+    (when (<= (hp ply) 0) (kill ply))))
 
 (defmethod update-object ((ply player) game)
   (with-slots (vx image image-r image-l dir-right) ply
