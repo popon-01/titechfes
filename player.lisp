@@ -1,7 +1,7 @@
 (in-package titechfes)
 
 ;;;player
-(define-class player (gameobject)
+(define-class player (gamecharacter)
   (image (get-image :player-l))
   (image-r (get-image :player-r))
   (image-l (get-image :player-l))
@@ -23,7 +23,8 @@
   (shot-cool 0)
   (dir-right t)
   (muteki nil)
-  (muteki-count 0))
+  (muteki-count 0)
+  (score 0))
 
 
 (defun player-keyevents (ply game)
@@ -78,19 +79,21 @@
     (when (and (<= (- velocity) vvx) 
 	       (<= vvx velocity))
       (setf while-dash nil))
-    (if (and muteki (zerop muteki-count))
-	(setf muteki nil)
-	(decf muteki-count))
-    (when (<= (hp ply) 0) (kill ply))))
+    (dec-muteki-frame ply)))
+
 
 (defmethod update-object ((ply player) game)
+  (call-next-method)
+  (when (not (while-dash ply))
+    (setf (in-air ply) (not (and (plusp (vy ply)) (zerop (dy ply))))))
+  (if (in-air ply) (player-in-air ply) (player-landed ply))
   (with-slots (vx image image-r image-l dir-right) ply
     (setf vx  0
 	  image (if dir-right image-r image-l))
     (player-keyevents ply game)
-    ;;(alive-detect)
     (player-accelerarion ply)
     (player-flag-update ply)))
+
 
 (defun player-in-air (ply)
   (setf (dash-cooltime ply) 20)
@@ -101,13 +104,6 @@
   (setf (jump-count ply) (max-jump ply)
 	(dash-count ply) (max-dash ply)
 	(dash-cooltime ply) 40))
-
-(defmethod draw-object :before ((ply player) game)
-  (when (not (while-dash ply))
-    (setf (in-air ply) (if (and (plusp (vy ply)) (zerop (dy ply))) nil t)))
-  (if (in-air ply) (player-in-air ply) (player-landed ply))
-  (incf (get-x ply) (dx ply))
-  (incf (get-y ply) (dy ply)))
 
 (defmethod change-bullet (bsym (player player))
   (setf (shot-name player)

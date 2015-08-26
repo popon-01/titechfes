@@ -7,10 +7,6 @@
   (penetrate nil)
   (cool-time 0))
 
-(defmethod draw-object :before ((bul bullet) game)
-  (incf (get-x bul) (vx bul))
-  (incf (get-y bul) (vy bul)))
-
 
 ;---template---
 ;(define-class name (bullet))
@@ -23,16 +19,13 @@
 (defun set-bullet (instance ply game)
   (let ((bul instance))
     (when (not (dir-right ply)) (setf (vx bul) (- (vx bul))))
-    (setf (get-x bul) (if (dir-right ply)
-			  (+ (get-x ply)
-			     (truncate (width ply) 2) 
-			     (truncate (width bul) 2))
-			  (- (get-x ply)
-			     (truncate (width ply) 2) 
-			     (truncate (width bul) 2)))
+    (setf (get-x bul) 
+	  (funcall (if (dir-right ply) #'+ #'-)
+		   (get-x ply)
+		   (truncate (width ply) 2)
+		   (truncate (width bul) 2))
 	  (get-y bul) (get-y ply))
-    (push bul (all-object game))
-    (push bul (bullets game))
+    (push-game-object bul game)
     (setf (shot-cool ply) (cool-time bul))))
 
 ;;;knife
@@ -44,6 +37,7 @@
   (cool-time 10))
 
 (defmethod update-object ((bul knife) game)
+  (call-next-method)
   (decf (life bul))
   (when (zerop (life bul)) (kill bul)))
 
@@ -59,6 +53,7 @@
   (vy -20))
 
 (defmethod update-object ((bul axe) game)
+  (call-next-method)
   (incf (vy bul) *gravity*)
   (when (> (vy bul) 10) (setf (vy bul) 10)))
 
@@ -75,6 +70,7 @@
   (vx 7))
 
 (defmethod update-object ((bul two-way) game)
+  (call-next-method)
   (decf (life bul))
   (when (zerop (life bul)) (kill bul)))
 
@@ -92,6 +88,7 @@
   (vx 7))
 
 (defmethod update-object ((bul penetrate) game)
+  (call-next-method)
   (decf (life bul))
   (when (zerop (life bul)) (kill bul)))
 
@@ -110,6 +107,7 @@
   (penetrate t))
 
 (defmethod update-object ((bul javelin) game)
+  (call-next-method)
   (decf (life bul))
   (when (zerop (life bul)) (kill bul)))
 
@@ -128,6 +126,7 @@
   (life 10))
 
 (defmethod update-object ((bul bomb) game)
+  (call-next-method)
   (cond ((equal (state bul) "bomb")
 	 (incf (vy bul) *gravity*)
 	 (when (> (vy bul) 10) (setf (vy bul) 10)))
@@ -163,6 +162,7 @@
   (stay-count 30))
 
 (defmethod update-object ((bul boomerang) game)
+  (call-next-method)
   (cond ((equal (state bul) "go")
 	 (if (plusp (vx bul))
 	     (decf (vx bul))

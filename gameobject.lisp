@@ -37,33 +37,12 @@
 			      (/ width 2))
 			   (- (y-in-camera y game) 
 			      (/ height 2)))))
-(defmethod update-object ((obj gameobject) game))
+
+(defmethod update-object ((obj gameobject) game)
+  (incf (get-x obj) (vx obj))
+  (incf (get-y obj) (vy obj)))
 
 (defmethod kill ((obj gameobject)) (setf (alive obj) nil))
-;;;wall
-(define-class wall (gameobject)
-  (image (get-image :wall)))
-
-(define-class move-wall (wall)
-  (vx 0) (vy 0) frame
-  (routine 120)
-  (stop-frame 0))
-(defmethod initialize-instance :after ((wall move-wall) &key)
-  (setf (frame wall) (routine wall)))
-
-(defmethod update-object ((wall move-wall) (game game))
-  (when (plusp (stop-frame wall))
-    (decf (stop-frame wall))
-    (return-from update-object))
-  (incf (get-x wall) (vx wall))
-  (incf (get-y wall) (vy wall))
-  (decf (frame wall))
-  (when (zerop (frame wall))
-    (setf (vx wall) (- (vx wall))
-	  (vy wall) (- (vy wall))
-	  (frame wall) (routine wall)
-	  (stop-frame wall) 10)))
-  
 
 ;------------------collide------------------
 (defgeneric rect-collide (a b))
@@ -82,6 +61,16 @@
   (- (get-x obj) (truncate (width obj) 2)))
 (defun get-top (obj)
   (- (get-y obj) (truncate (height obj) 2)))
+
+(defmethod rect-collide= (a b)
+  (and (<= (- (get-x a) (/ (width a) 2))
+	   (+ (get-x b) (/ (width b) 2)))
+       (<= (- (get-x b) (/ (width b) 2))
+	   (+ (get-x a) (/ (width a) 2)))
+       (<= (- (get-y a) (/ (height a) 2))
+	   (+ (get-y b) (/ (height b) 2)))
+       (<= (- (get-y b) (/ (height b) 2))
+	   (+ (get-y a) (/ (height a) 2)))))
 
 (defun rect-collision-judge (rec1 rec2)
   (and (< (sdl:x rec1) (sdl:x2 rec2))

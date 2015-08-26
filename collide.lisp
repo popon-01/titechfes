@@ -40,14 +40,6 @@
 	  ((minusp res) "x")
 	  (t "bound"))))
 
-(defgeneric set-muteki (obj))
-(defmethod set-muteki ((ply player))
-  (setf (muteki ply) t
-	(muteki-count ply) *player-mutekitime*))
-(defmethod set-muteki ((enem enemy))
-  (setf (muteki enem) t
-	(muteki-count enem) *enemy-mutekitime*))
-
 
 (defgeneric collide (obj-a obj-b game))
 (defcollide (obj-a gameobject) (obj-b gameobject))
@@ -62,21 +54,20 @@
 	      ((equal dir "x") (adjust-dx ply chip)))))))
 
 (defcollide (ply player) (enem enemy)
-  (when (and (rect-collide ply enem) (not (muteki ply)))
-    (decf (hp ply) (atk enem))
-    (set-muteki ply)
+  (when (rect-collide ply enem)
+    (attack enem ply)
+#|
     (multiple-value-bind (dir-x dir-y)
 	(dir-univec (get-x enem) (get-y enem)
 		    (get-x ply) (get-y ply))
       (incf (vvx ply) (floor (* 10 dir-x)))
       (setf (vy ply) (floor (* 10 dir-y))))))
-
+|#
+))
 (defcollide (ply player) (ebul enemy-bullet)
   (when (rect-collide ply ebul)
-    (when (not (muteki ply))
-      (decf (hp ply) (atk ebul))
-      (set-muteki ply))
-    (setf (alive ebul) nil)))
+    (attack ebul ply)
+    (kill ebul)))
 
 ;;enemy-behavior
 (defcollide (enem enemy) (chip wall)
@@ -101,9 +92,40 @@
 	      (adjust-dx enem chip)
 	      (setf vx (* 3 (- vx)))))))))
 
+(defcollide (wall damage-wall) (player player)
+  (call-next-method)
+  (when (rect-collide= player wall)
+    (attack wall player)))
+
+(defcollide (wall break-wall) (bullet bullet)
+  (when (rect-collide wall bullet)
+    (call-next-method)
+    (attack bullet wall)))
+
+(defcollide (wall break-wall) (bullet penetrate)
+  (when (rect-collide wall bullet)
+    (attack bullet wall)))
+(defcollide (wall break-wall) (bomb bomb)
+  (call-next-method)
+  (when (and (rect-collide wall bomb)
+	     (string= (state bomb) "explosion"))
+    (attack bomb wall)))
+
+(defcollide (wall easy-break-wall) (player player)
+  (call-next-method)
+  (when (and (rect-collide= wall player)
+	     (< (abs (- (get-x wall) (get-x player)))
+		(ash (+ (width wall) (width player)) -1))
+	     (or (and (in-air player) (<= (vy player) 0)
+		      (< (get-y wall) (get-y player)))
+		 (and (= (1+ (jump-cool player))
+			 (jump-cooltime player))
+		      (< (get-y player) (get-y wall)))))
+    (attack 10 wall)))
+
 ;;enemy-bullet-behavior
 (defcollide (ebul enemy-bullet) (chip wall)
-  (when (rect-collide ebul chip) (setf (alive ebul) nil)))
+  (when (rect-collide ebul chip) (kill ebul)))
 
 ;;bullet-behavior
 (defcollide (bul bullet) (chip wall)
@@ -111,9 +133,7 @@
 
 (defcollide (enem enemy) (bul bullet)
   (when (rect-collide enem bul)
-    (when (not (muteki enem))
-      (decf (hp enem) (atk bul))
-      (set-muteki enem))
+    (attack bul enem)
     (setf (alive bul) (penetrate bul))))
 
 (defcollide (bul penetrate) (chip wall))
@@ -121,7 +141,7 @@
 (defcollide (bul bomb) (chip wall)
   (when (and (rect-collide bul chip) 
 	     (equal (state bul) "bomb"))
-    (make-explosion bul)))
+      (make-explosion bul)))
 
 (defcollide (enem enemy) (bul bomb)
   (when (rect-collide enem bul)
@@ -154,9 +174,8 @@
     (setf (shot-cool ply) (cool-time bul))))
 
 (defcollide (item item) (p player)
-  (when (rect-collide item p) (kill item)))
+  (when (rect-collide item p) 
+    (item-effect item p game)
+    (kill item)))
 
-(defcollide (item weapon-item) (p player)
-  (when (rect-collide item p)
-    (change-bullet (weapon item) p)
-    (call-next-method)))
+
