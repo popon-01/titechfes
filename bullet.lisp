@@ -45,7 +45,7 @@
 
 (defmethod update-object ((bul knife) game)
   (decf (life bul))
-  (when (zerop (life bul)) (setf (alive bul) nil)))
+  (when (zerop (life bul)) (kill bul)))
 
 (defun shot-knife (ply game)
   (shoot knife ply game))
@@ -76,7 +76,7 @@
 
 (defmethod update-object ((bul two-way) game)
   (decf (life bul))
-  (when (zerop (life bul)) (setf (alive bul) nil)))
+  (when (zerop (life bul)) (kill bul)))
 
 (defun shot-two-way (ply game)
   (shoot two-way ply game :vy -1)
@@ -93,7 +93,7 @@
 
 (defmethod update-object ((bul penetrate) game)
   (decf (life bul))
-  (when (zerop (life bul)) (setf (alive bul) nil)))
+  (when (zerop (life bul)) (kill bul)))
 
 (defun shot-penetrate (ply game)
   (shoot penetrate ply game))
@@ -111,7 +111,7 @@
 
 (defmethod update-object ((bul javelin) game)
   (decf (life bul))
-  (when (zerop (life bul)) (setf (alive bul) nil)))
+  (when (zerop (life bul)) (kill bul)))
 
 (defun shot-javelin (ply game)
   (shoot javelin ply game))
@@ -133,7 +133,7 @@
 	 (when (> (vy bul) 10) (setf (vy bul) 10)))
 	((equal (state bul) "explosion")
 	 (decf (life bul))
-	 (when (zerop (life bul)) (setf (alive bul) nil)))))
+	 (when (zerop (life bul)) (kill bul)))))
 
 
 (defun shot-bomb (ply game)

@@ -1,17 +1,14 @@
 (in-package titechfes)
 
 (defun try-move (obj1 obj2 &key (dx1 0) (dy1 0) (dx2 0) (dy2 0))
-  (sdl:with-rectangle (obj1-rec (sdl:rectangle 
-				   :x (+ (get-left obj1) dx1) 
-				   :y (+ (get-top obj1) dy1)
-				   :w (width obj1)
-				   :h (height obj1)))
-    (sdl:with-rectangle (obj2-rec (sdl:rectangle 
-				    :x (+ (get-left obj2) dx2)
-				    :y (+ (get-top obj2) dy2)
-				    :w (width obj2)
-				    :h (height obj2)))
-      (not (rect-collision-judge obj1-rec obj2-rec)))))
+  (not (and (< (- (+ (get-x obj1) dx1) (/ (width obj1) 2))
+	       (+ (+ (get-x obj2) dx2) (/ (width obj2) 2)))
+	    (< (- (+ (get-x obj2) dx2) (/ (width obj2) 2))
+	       (+ (+ (get-x obj1) dx1) (/ (width obj1) 2)))
+	    (< (- (+ (get-y obj1) dy1) (/ (height obj1) 2))
+	       (+ (+ (get-y obj2) dy2) (/ (height obj2) 2)))
+	    (< (- (+ (get-y obj2) dy2) (/ (height obj2) 2))
+	       (+ (+ (get-y obj1) dy1) (/ (height obj1) 2))))))
 
 (defun adjust-dx (move-obj obj2)
   (setf (dx move-obj) (- (get-x obj2)
@@ -30,6 +27,18 @@
 			     (- (+ (truncate (height obj2) 2)
 				   (truncate (height move-obj) 2))))
 			 (get-y move-obj))))
+
+(defun dir-detect (target obj)
+  (let* ((vx1 (+ (truncate (width target) 2)
+		 (truncate (width obj) 2)))
+	 (vy1 (+ (truncate (height target) 2)
+		 (truncate (height obj) 2)))
+	 (vx2 (abs (- (get-x target) (get-x obj))))
+	 (vy2 (abs (- (get-y target) (get-y obj))))
+	 (res (- (* vx1 vy2) (* vy1 vx2))))
+    (cond ((plusp res) "y")
+	  ((minusp res) "x")
+	  (t "bound"))))
 
 (defgeneric set-muteki (obj))
 (defmethod set-muteki ((ply player))
@@ -54,21 +63,22 @@
 (defcollide (ply player) (chip wall)
   (with-slots (dx dy) ply
     (when (not (try-move ply chip :dx1 dx :dy1 dy))
-      (let ((dir-x (- (get-x chip) (get-x ply)))
-	    (dir-y (- (get-y chip) (get-y ply))))
-	(if (< (abs dir-x) (abs dir-y))
-	    (progn
-	      (if (plusp dy) (player-landed ply))
-	      (adjust-dy ply chip))
-	    (adjust-dx ply chip))))))
+      (let ((dir (dir-detect ply chip)))
+	(cond ((equal dir "y") (progn
+				 (adjust-dy ply chip)
+				 (if (< (get-y ply) (get-y chip))
+				     (player-landed ply))))
+	      ((equal dir "x") (adjust-dx ply chip)))))))
 
 (defcollide (ply player) (enem enemy)
   (when (and (rect-collide ply enem) (not (muteki ply)))
     (decf (hp ply) (atk enem))
     (set-muteki ply)
-    (incf (vy ply) -15)
-    (incf (vvx ply) (if (plusp (- (get-x ply) (get-x enem)))
-		       15 -15))))
+    (multiple-value-bind (dir-x dir-y)
+	(dir-univec (get-x enem) (get-y enem)
+		    (get-x ply) (get-y ply))
+      (incf (vvx ply) (floor (* 10 dir-x)))
+      (setf (vy ply) (floor (* 10 dir-y))))))
 
 (defcollide (ply player) (ebul enemy-bullet)
   (when (rect-collide ply ebul)
@@ -86,6 +96,19 @@
 	(if (< (abs dir-x) (abs dir-y))
 	    (adjust-dy enem chip)
 	    (adjust-dx enem chip))))))
+
+(defcollide (enem flying) (chip wall)
+  (with-slots (dx dy vx vy) enem
+    (when (not (try-move enem chip :dx1 dx :dy1 dy))
+      (let ((dir-x (- (get-x chip) (get-x enem)))
+	    (dir-y (- (get-y chip) (get-y enem))))
+	(if (< (abs dir-x) (abs dir-y))
+	    (progn 
+	      (adjust-dy enem chip)
+	      (setf vy (* 3 (- vy))))
+	    (progn
+	      (adjust-dx enem chip)
+	      (setf vx (* 3 (- vx)))))))))
 
 ;;enemy-bullet-behavior
 (defcollide (ebul enemy-bullet) (chip wall)
@@ -116,6 +139,18 @@
 	  ((equal (state bul) "explosion")
 	   (decf (hp enem) (atk bul))))))
 
+(defcollide (bul axe) (chip wall)
+  (whens ((and (not (try-move bul chip :dx1 (vx bul) :dy1 (vy bul)))
+	       (<= (vy bul) 0)
+	       (< (abs (- (get-x bul) (get-x chip)))
+		  (abs (- (get-y bul) (get-y chip)))))
+	  (setf (vy bul) (+ (get-y chip)
+			    (truncate (height chip) 2)
+			    (truncate (height bul) 2)
+			    (- (get-y bul)))))
+	 ((rect-collide bul chip) (kill bul))))
+  
+
 (defcollide (bul boomerang) (chip wall)
   (when (and (rect-collide bul chip) 
 	     (equal (state bul) "go"))
@@ -124,8 +159,8 @@
 (defcollide (bul boomerang) (ply player)
   (when (and (rect-collide bul ply)
 	     (equal (state bul) "back"))
-    (setf (alive bul) nil
-	  (shot-cool ply) (cool-time bul))))
+    (kill bul)
+    (setf (shot-cool ply) (cool-time bul))))
 
 (defcollide (item item) (p player)
   (when (rect-collide item p) (kill item)))

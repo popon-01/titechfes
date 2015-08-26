@@ -41,3 +41,22 @@
   (mapl (lambda (xs) (mapcar (lambda (x) (funcall fn (car xs) x))
 			     (cdr xs)))
 	lis))
+
+(defun rad (degree) (* pi (/ degree 180.0)))
+
+(defun vec-abs (x y)
+  (sqrt (+ (* x x) (* y y))))
+
+(defun euc-dist (x1 y1 x2 y2)
+  (vec-abs (- x1 x2) (- y1 y2)))
+
+(defun univec (x y)
+  (let ((dist (vec-abs x y)))
+    (if (zerop dist)
+	(values 0.0 0.0)
+	(values (/ x dist) (/ y dist)))))
+
+(defun dir-univec (sx sy tx ty)
+  (multiple-value-bind (res-x res-y) 
+      (univec (- tx sx) (- ty sy))
+    (values res-x res-y)))
