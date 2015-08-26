@@ -11,22 +11,20 @@
 	       (+ (+ (get-y obj1) dy1) (/ (height obj1) 2))))))
 
 (defun adjust-dx (move-obj obj2)
-  (setf (dx move-obj) (- (get-x obj2)
-			 (if (plusp (- (get-x obj2) (get-x move-obj)))
-			     (+ (truncate (width obj2) 2)
-				(truncate (width move-obj) 2))
-			     (- (+ (truncate (width obj2) 2)
-				   (truncate (width move-obj) 2))))
-			 (get-x move-obj))))
+  (setf (dx move-obj) 
+	(- (get-x obj2)
+	   (pmif (plusp (- (get-x obj2) (get-x move-obj)))
+		 (+ (truncate (width obj2) 2)
+		    (truncate (width move-obj) 2)))
+	   (get-x move-obj))))
 
 (defun adjust-dy (move-obj obj2)
-  (setf (dy move-obj) (- (get-y obj2)
-			 (if (plusp (- (get-y obj2) (get-y move-obj)))
-			     (+ (truncate (height obj2) 2)
-				(truncate (height move-obj) 2))
-			     (- (+ (truncate (height obj2) 2)
-				   (truncate (height move-obj) 2))))
-			 (get-y move-obj))))
+  (setf (dy move-obj) 
+	(- (get-y obj2)
+	   (pmif (plusp (- (get-y obj2) (get-y move-obj)))
+		 (+ (truncate (height obj2) 2)
+		    (truncate (height move-obj) 2)))
+	   (get-y move-obj))))
 
 (defun dir-detect (target obj)
   (let* ((vx1 (+ (truncate (width target) 2)
@@ -36,9 +34,8 @@
 	 (vx2 (abs (- (get-x target) (get-x obj))))
 	 (vy2 (abs (- (get-y target) (get-y obj))))
 	 (res (- (* vx1 vy2) (* vy1 vx2))))
-    (cond ((plusp res) "y")
-	  ((minusp res) "x")
-	  (t "bound"))))
+    (cond ((plusp res) :y)
+	  ((minusp res) :x))))
 
 
 (defgeneric collide (obj-a obj-b game))
@@ -46,12 +43,21 @@
 
 ;;player-behavior
 
-(defcollide (ply player) (chip wall)
-  (with-slots (dx dy) ply
-    (when (not (try-move ply chip :dx1 dx :dy1 dy))
-      (let ((dir (dir-detect ply chip)))
-	(cond ((equal dir "y") (adjust-dy ply chip))
-	      ((equal dir "x") (adjust-dx ply chip)))))))
+(defcollide (chr gamecharacter) (chip wall)
+  (with-slots (dx dy) chr
+    (when (not (try-move chr chip :dx1 dx :dy1 dy))
+      (let ((dir (dir-detect chr chip)))
+	(cond ((eq dir :y) (adjust-dy chr chip))
+	      ((eq dir :x) (adjust-dx chr chip)))))))
+
+(defcollide (chr player) (chip move-wall)
+  (call-next-method)
+  (when (and (rect-collide= chr chip)
+	     (< (abs (- (get-x chip) (get-x chr)))
+		(ash (+ (width chip) (width chr)) -1))
+	     (< (get-y chr) (get-y chip)))
+    (incf (rvx chr) (vx chip))
+    (incf (rvy chr) (vy chip))))
 
 (defcollide (ply player) (enem enemy)
   (when (rect-collide ply enem)
@@ -70,15 +76,6 @@
     (kill ebul)))
 
 ;;enemy-behavior
-(defcollide (enem enemy) (chip wall)
-  (with-slots (dx dy) enem
-    (when (not (try-move enem chip :dx1 dx :dy1 dy))
-      (let ((dir-x (- (get-x chip) (get-x enem)))
-	    (dir-y (- (get-y chip) (get-y enem))))
-	(if (< (abs dir-x) (abs dir-y))
-	    (adjust-dy enem chip)
-	    (adjust-dx enem chip))))))
-
 (defcollide (enem flying) (chip wall)
   (with-slots (dx dy vx vy) enem
     (when (not (try-move enem chip :dx1 dx :dy1 dy))
@@ -116,7 +113,7 @@
   (when (and (rect-collide= wall player)
 	     (< (abs (- (get-x wall) (get-x player)))
 		(ash (+ (width wall) (width player)) -1))
-	     (or (and (in-air player) (<= (vy player) 0)
+	     (or (and (in-air player) (< (vy player) 0)
 		      (< (get-y wall) (get-y player)))
 		 (and (= (1+ (jump-cool player))
 			 (jump-cooltime player))
@@ -146,7 +143,7 @@
 (defcollide (enem enemy) (bul bomb)
   (when (rect-collide enem bul)
     (cond ((equal (state bul) "bomb") 
-	   (make-explosion bul))
+v	   (make-explosion bul))
 	  ((equal (state bul) "explosion")
 	   (decf (hp enem) (atk bul))))))
 

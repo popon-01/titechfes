@@ -60,3 +60,16 @@
   (multiple-value-bind (res-x res-y) 
       (univec (- tx sx) (- ty sy))
     (values res-x res-y)))
+
+(defun slot-list (instance)
+  (mapcar #'c2mop:slot-definition-name
+	  (c2mop:class-slots (class-of instance))))
+
+(defun nmapslot (fn instance)
+  (dolist (slot (slot-list instance))
+    (setf (slot-value instance slot)
+	  (funcall fn (slot-value instance slot)))))
+(defmacro pmif (test num)
+  (with-gensyms (gnum)
+    `(let ((,gnum ,num))
+       (if ,test ,gnum (- ,gnum)))))

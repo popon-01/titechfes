@@ -56,7 +56,7 @@
 	   (decf dash-count))))))
 
 (defun player-accelerarion (ply)
-  (with-slots  (dx dy vx vy vvx while-dash) ply
+  (with-slots  (dx dy vx vy vvx rvx rvy while-dash) ply
     (incf vy *gravity*)
     (when (and while-dash (plusp vy)) (setf vy 0)) 
     (when (> vy 10) (setf vy 10))
@@ -65,7 +65,9 @@
     (cond ((> vvx 10) (incf vx 10))
 	  ((< vvx -10) (incf vx -10))
 	  (t (incf vx vvx)))
-    (setf dx vx dy vy)))
+    (setf dx (+ vx rvx)
+	  dy (+ vy rvy)
+	  rvx 0 rvy 0)))
 
 (defun player-flag-update (ply)
   (with-slots (vvx velocity
@@ -78,14 +80,14 @@
       ((> shot-cool 0) (decf shot-cool)))
     (when (and (<= (- velocity) vvx) 
 	       (<= vvx velocity))
-      (setf while-dash nil))
-    (dec-muteki-frame ply)))
+      (setf while-dash nil))))
 
 
 (defmethod update-object ((ply player) game)
   (call-next-method)
   (when (not (while-dash ply))
-    (setf (in-air ply) (not (and (plusp (vy ply)) (zerop (dy ply))))))
+    (setf (in-air ply) (not (and (plusp (vy ply)) 
+				 (zerop (dy ply))))))
   (if (in-air ply) (player-in-air ply) (player-landed ply))
   (with-slots (vx image image-r image-l dir-right) ply
     (setf vx  0

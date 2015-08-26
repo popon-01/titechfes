@@ -23,5 +23,5 @@
 	       (:file "map")
 	       (:file "camera")
                (:file "titechfes"))
-  :depends-on (:lispbuilder-sdl :split-sequence :iterate :alexandria))
+  :depends-on (:lispbuilder-sdl :split-sequence :iterate :alexandria :closer-mop))
 

@@ -2,6 +2,10 @@
 
 (define-class gamecharacter (gameobject)
   (hp 100)
+  (dx 0)
+  (dy 0)
+  (rvx 0)
+  (rvy 0)
   (muteki nil)
   (muteki-count 0)
   (muteki-time 10))

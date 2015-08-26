@@ -63,4 +63,6 @@
 	       (sdl:clear-display sdl:*black*)
 	       (draw-all game)
 	       (draw-info game)
-	       (sdl:update-display))))))
+	       (sdl:update-display)
+	       ;(next-key-state (key-state game))
+	       )))))

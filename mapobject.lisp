@@ -7,7 +7,8 @@
 (define-class move-wall (wall)
   (vx 0) (vy 0) frame
   (routine 120)
-  (stop-frame 0))
+  (stop-frame 0)
+  (stop-time 10))
 
 (defmethod initialize-instance :after ((wall move-wall) &key)
   (setf (frame wall) (routine wall)))
@@ -23,10 +24,10 @@
     (setf (vx wall) (- (vx wall))
 	  (vy wall) (- (vy wall))
 	  (frame wall) (routine wall)
-	  (stop-frame wall) 10)))
+	  (stop-frame wall) (stop-time wall))))
 
 (define-class damage-wall (wall)
-  (atk 60))
+  (atk 20))
 
 (defmethod draw-object ((wall damage-wall) game)
   (call-next-method)
