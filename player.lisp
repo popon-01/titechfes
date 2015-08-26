@@ -44,7 +44,7 @@
 	  ((and right (not while-dash))
 	   (incf vx velocity) (setf dir-right t))
 	  ((and jump (plusp jump-count) (zerop jump-cool))
-	   (setf while-dash nil 
+	   (setf while-dash nil
 		 jump-cool jump-cooltime
 		 vy jump-accel)
 	   (decf jump-count))
@@ -67,14 +67,10 @@
     (setf dx vx dy vy)))
 
 (defun player-flag-update (ply)
-  (with-slots (vvx velocity in-air
+  (with-slots (vvx velocity
 		   jump-cool shot-cool
-		   dash-cool dash-cooltime while-dash  
+		   dash-cool while-dash  
 		   muteki muteki-count) ply
-    (setf in-air t
-	  dash-cooltime 20)
-    (when (equal (jump-count ply) (max-jump ply))
-      (decf (jump-count ply)))
     (whens
       ((> jump-cool 0) (decf jump-cool))
       ((> dash-cool 0) (decf dash-cool))
@@ -96,7 +92,19 @@
     (player-accelerarion ply)
     (player-flag-update ply)))
 
+(defun player-in-air (ply)
+  (setf (dash-cooltime ply) 20)
+  (when (equal (jump-count ply) (max-jump ply))
+    (decf (jump-count ply))))
+
+(defun player-landed (ply)
+  (setf (jump-count ply) (max-jump ply)
+	(dash-count ply) (max-dash ply)
+	(dash-cooltime ply) 40))
+
 (defmethod draw-object :before ((ply player) game)
+  (setf (in-air ply) (if (and (plusp (vy ply)) (zerop (dy ply))) nil t))
+  (if (in-air ply) (player-in-air ply) (player-landed ply))
   (incf (get-x ply) (dx ply))
   (incf (get-y ply) (dy ply)))
   

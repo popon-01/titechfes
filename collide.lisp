@@ -54,20 +54,11 @@
 
 ;;player-behavior
 
-(defun player-landed (ply)
-  (setf (in-air ply) nil
-	(jump-count ply) (max-jump ply)
-	(dash-count ply) (max-dash ply)
-	(dash-cooltime ply) 40))
-
 (defcollide (ply player) (chip wall)
   (with-slots (dx dy) ply
     (when (not (try-move ply chip :dx1 dx :dy1 dy))
       (let ((dir (dir-detect ply chip)))
-	(cond ((equal dir "y") (progn
-				 (adjust-dy ply chip)
-				 (if (< (get-y ply) (get-y chip))
-				     (player-landed ply))))
+	(cond ((equal dir "y") (adjust-dy ply chip))
 	      ((equal dir "x") (adjust-dx ply chip)))))))
 
 (defcollide (ply player) (enem enemy)
