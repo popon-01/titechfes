@@ -108,7 +108,7 @@
   (if (in-air ply) (player-in-air ply) (player-landed ply))
   (incf (get-x ply) (dx ply))
   (incf (get-y ply) (dy ply)))
-  
+
 (defmethod change-bullet (bsym (player player))
   (setf (shot-name player)
 	(format nil "~@(~a~)" bsym)
