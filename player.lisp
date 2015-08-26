@@ -103,7 +103,8 @@
 	(dash-cooltime ply) 40))
 
 (defmethod draw-object :before ((ply player) game)
-  (setf (in-air ply) (if (and (plusp (vy ply)) (zerop (dy ply))) nil t))
+  (when (not (while-dash ply))
+    (setf (in-air ply) (if (and (plusp (vy ply)) (zerop (dy ply))) nil t)))
   (if (in-air ply) (player-in-air ply) (player-landed ply))
   (incf (get-x ply) (dx ply))
   (incf (get-y ply) (dy ply)))
