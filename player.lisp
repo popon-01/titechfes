@@ -25,7 +25,7 @@
   (muteki nil)
   (muteki-count 0)
   (score 0)
-  (bullet-list #(knife nil nil))
+  (bullet-list (vector 'knife nil nil))
   (bullet-i 0)
   (bullet-num 1))
 
