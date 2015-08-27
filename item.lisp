@@ -38,3 +38,20 @@
 (defmethod item-effect ((item score-item) (player player)
 			game)
   (incf (score player) (point item)))
+
+(define-class jump-up (item))
+(defmethod item-effect ((item jump-up) (player player) game)
+  (incf (max-jump player)))
+
+(define-class dash-up (item))
+(defmethod item-effect ((item dash-up) (player player) game)
+  (incf (max-dash player)))
+
+
+
+
+
+
+
+
+

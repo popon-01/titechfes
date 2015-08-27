@@ -36,7 +36,9 @@
    ("3" break-wall)
    ("4" easy-break-wall)
    ("r" recovery-item)
-   ("c" score-item)))
+   ("c" score-item)
+   ("s" jump-up)
+   ("z" dash-up)))
 
 
 (defmethod push-game-object ((obj null) game))
