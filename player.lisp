@@ -24,8 +24,10 @@
   (dir-right t)
   (muteki nil)
   (muteki-count 0)
-  (score 0))
-
+  (score 0)
+  (bullet-list #(knife nil nil))
+  (bullet-i 0)
+  (bullet-num 1))
 
 (defun player-keyevents (ply game)
   (with-slots (vx vy vvx velocity 
@@ -36,7 +38,7 @@
 		  dash-cool dash-cooltime
 		  shot-func shot-cool
 		  dir-right alive) ply
-      (with-slots (right left jump down shot dash) (keystate game)
+      (with-slots (right left jump down shot dash weapon) (keystate game)
 	(whens
 	  ((and shot (zerop shot-cool))
 	   (funcall shot-func ply game))
@@ -49,6 +51,7 @@
 		 jump-cool jump-cooltime
 		 vy jump-accel)
 	   (decf jump-count))
+	  (weapon (change-bullet ply))
 	  ((and dash (plusp dash-count) (zerop dash-cool))
 	   (setf while-dash t
 		 dash-cool dash-cooltime
@@ -82,7 +85,6 @@
 	       (<= vvx velocity))
       (setf while-dash nil))))
 
-
 (defmethod update-object ((ply player) game)
   (call-next-method)
   (when (not (while-dash ply))
@@ -107,8 +109,33 @@
 	(dash-count ply) (max-dash ply)
 	(dash-cooltime ply) 40))
 
-(defmethod change-bullet (bsym (player player))
+(defun change-bullet (player)
+  (setf (bullet-i player)
+	(mod (1+ (bullet-i player))
+	     (bullet-num player)))
+  (update-bullet player))
+
+(defmethod update-bullet ((player player))
   (setf (shot-name player)
-	(format nil "~@(~a~)" bsym)
+	(format nil "~@(~a~)" (elt (bullet-list player)
+				   (bullet-i player)))
 	(shot-func player)
-	(symbol-function (symbolicate 'shot- bsym))))
+	(symbol-function 
+	 (symbolicate 'shot- 
+		      (elt (bullet-list player)
+			   (bullet-i player))))))
+
+(defmethod get-bullet (bsym (player player))
+  (with-accessors ((blis bullet-list) (bi bullet-i)
+		   (bnum bullet-num)) player
+    (unless (position bsym blis)
+      (if (< bnum 3)
+	  (letrec ((i 0))
+	    (if (elt blis i)
+		(rec (1+ i))
+		(progn (setf (elt blis i) bsym
+			     bnum (1+ bnum)
+			     bi i)
+		       (update-bullet player))))
+	  (progn (setf (elt blis bi) bsym)
+		 (update-bullet player))))))

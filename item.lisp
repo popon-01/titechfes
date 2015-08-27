@@ -17,7 +17,7 @@
 
 (defmethod item-effect ((item weapon-item) (player player)
 			game)
-  (change-bullet (weapon item) player)
+  (get-bullet (weapon item) player)
   (call-next-method))
 
 (define-class recovery-item (item)
@@ -46,12 +46,3 @@
 (define-class dash-up (item))
 (defmethod item-effect ((item dash-up) (player player) game)
   (incf (max-dash player)))
-
-
-
-
-
-
-
-
-

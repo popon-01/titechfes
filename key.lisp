@@ -19,10 +19,11 @@
 (defkeystate titechfes-key
     (right :sdl-key-right)
   (left :sdl-key-left)
-  (jump :sdl-key-Lshift)
+  (jump :sdl-key-c)
   (down :sdl-key-down)
-  (dash :sdl-key-z)
-  (shot :sdl-key-x))
+  (dash :sdl-key-lshift)
+  (shot :sdl-key-x)
+  (weapon :sdl-key-z))
 
 #|
 (defmacro defkeystate (name &rest keymaps)

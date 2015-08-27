@@ -1,5 +1,5 @@
 (in-package titechfes)
-
+y
 ;------------------macro------------------
 
 
@@ -69,7 +69,20 @@
   (dolist (slot (slot-list instance))
     (setf (slot-value instance slot)
 	  (funcall fn (slot-value instance slot)))))
+
 (defmacro pmif (test num)
   (with-gensyms (gnum)
     `(let ((,gnum ,num))
        (if ,test ,gnum (- ,gnum)))))
+
+(defmacro alambda (vars &body body)
+  `(labels ((self ,vars ,@body))
+     #'self))
+
+(defmacro letrec (vars &body body)
+  `(labels ((rec ,(mapcar #'first vars) ,@body))
+     (rec ,@(mapcar #'second vars))))
+(defmacro while (test &body body)
+  `(do ()
+       ((not ,test))
+     ,@body))
