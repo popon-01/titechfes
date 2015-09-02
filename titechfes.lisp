@@ -49,10 +49,10 @@
 	(:key-down-event (:key key)
 			 (if (sdl:key= key :sdl-key-escape)
 			     (sdl:push-quit-event)
-			     (update-key-state key t 
+			     (update-key-state key 3
 				(keystate game))))
 	(:key-up-event (:key key)
-		       (update-key-state key nil
+		       (update-key-state key 2
 			   (keystate game)))
 	(:idle (update-all game)
 	       (round-robin (rcurry #'collide game)
@@ -64,5 +64,5 @@
 	       (draw-all game)
 	       (draw-info game)
 	       (sdl:update-display)
-	       ;(next-key-state (key-state game))
+	       (next-key-state (keystate game))
 	       )))))

@@ -40,19 +40,19 @@
 		  dir-right alive) ply
       (with-slots (right left jump down shot dash weapon) (keystate game)
 	(whens
-	  ((and shot (zerop shot-cool))
+	  ((and (key-pressed-p shot) (zerop shot-cool))
 	   (funcall shot-func ply game))
-	  ((and left (not while-dash)) 
+	  ((and (key-pressed-p left) (not while-dash))
 	   (decf vx velocity) (setf dir-right nil))
-	  ((and right (not while-dash))
+	  ((and (key-pressed-p right) (not while-dash))
 	   (incf vx velocity) (setf dir-right t))
-	  ((and jump (plusp jump-count) (zerop jump-cool))
+	  ((and (key-down-p jump) (plusp jump-count) (zerop jump-cool))
 	   (setf while-dash nil
 		 jump-cool jump-cooltime
 		 vy jump-accel)
 	   (decf jump-count))
-	  (weapon (change-bullet ply))
-	  ((and dash (plusp dash-count) (zerop dash-cool))
+	  ((key-down-p weapon) (change-bullet ply))
+	  ((and (key-down-p dash) (plusp dash-count) (zerop dash-cool))
 	   (setf while-dash t
 		 dash-cool dash-cooltime
 		 vvx (if dir-right dash-accel (- dash-accel)))
