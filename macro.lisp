@@ -73,3 +73,15 @@
   (with-gensyms (gnum)
     `(let ((,gnum ,num))
        (if ,test ,gnum (- ,gnum)))))
+
+(defmacro alambda (vars &body body)
+  `(labels ((self ,vars ,@body))
+     #'self))
+
+(defmacro letrec (vars &body body)
+  `(labels ((rec ,(mapcar #'first vars) ,@body))
+     (rec ,@(mapcar #'second vars))))
+(defmacro while (test &body body)
+  `(do ()
+       ((not ,test))
+     ,@body))

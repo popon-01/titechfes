@@ -142,23 +142,21 @@
 
 (defcollide (enem enemy) (bul bomb)
   (when (rect-collide enem bul)
-    (cond ((equal (state bul) "bomb") 
+    (cond ((equal (state bul) "bomb")
 	   (make-explosion bul))
 	  ((equal (state bul) "explosion")
 	   (decf (hp enem) (atk bul))))))
 
 (defcollide (bul axe) (chip wall)
-  (whens ((and (not (try-move bul chip :dx1 (vx bul) :dy1 (vy bul)))
-	       (<= (vy bul) 0)
-	       (< (abs (- (get-x bul) (get-x chip)))
-		  (abs (- (get-y bul) (get-y chip)))))
-	  (setf (vy bul) (+ (get-y chip)
-			    (truncate (height chip) 2)
-			    (truncate (height bul) 2)
-			    (- (get-y bul)))))
-	 ((rect-collide bul chip) (kill bul))))
-
-  
+  (call-next-method)
+  (when (and (not (try-move bul chip :dx1 (vx bul) :dy1 (vy bul)))
+	     (<= (vy bul) 0)
+	     (< (abs (- (get-x bul) (get-x chip)))
+		(abs (- (get-y bul) (get-y chip)))))
+    (setf (vy bul) (+ (get-y chip)
+		      (truncate (height chip) 2)
+		      (truncate (height bul) 2)
+		      (- (get-y bul))))))
 
 (defcollide (bul boomerang) (chip wall)
   (when (and (rect-collide bul chip) 

@@ -16,6 +16,7 @@
 		     `((string= ,(car xs) code)
 		       (make-instance ',(second xs)
 				      ,@(cddr xs) :x x :y y))) table)))
+
 (defun make-game-object (code x y)
   (map-char-table
    ("1" wall)
@@ -36,7 +37,9 @@
    ("3" break-wall)
    ("4" easy-break-wall)
    ("r" recovery-item)
-   ("c" score-item)))
+   ("c" score-item)
+   ("s" jump-up)
+   ("z" dash-up)))
 
 
 (defmethod push-game-object ((obj null) game))

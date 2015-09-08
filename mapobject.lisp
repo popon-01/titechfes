@@ -5,26 +5,44 @@
   (image (get-image :wall)))
 
 (define-class move-wall (wall)
-  (vx 0) (vy 0) frame
+  (vx 0) (vy 0)
   (routine 120)
-  (stop-frame 0)
-  (stop-time 10))
+  (stop-time 10)
+  (move-function nil))
 
 (defmethod initialize-instance :after ((wall move-wall) &key)
-  (setf (frame wall) (routine wall)))
+  (setf (move-function wall) 
+	(move-generator wall)))
+
+(defun move-generator (mwall)
+  (let ((frame (routine mwall))
+	(state :move)
+	(default-vx (vx mwall))
+	(default-vy (vy mwall)))
+    (lambda ()
+      (decf frame)
+      (when (zerop frame)
+	(case state
+	  (:move  (setf (vx mwall) 0
+			(vy mwall) 0
+			frame (stop-time mwall)
+			state :stop))
+	  (:stop (setf (vx mwall) (- default-vx)
+		       (vy mwall) (- default-vy)
+		       frame (routine mwall)
+		       state :-move))
+	  (:-move (setf (vx mwall) 0
+			(vy mwall) 0
+			frame (stop-time mwall)
+			state :stop2))
+	  (:stop2 (setf (vx mwall) default-vx
+			(vy mwall) default-vy
+			frame (routine mwall)
+			state :move)))))))
 
 (defmethod update-object ((wall move-wall) (game game))
-  (when (plusp (stop-frame wall))
-    (decf (stop-frame wall))
-    (return-from update-object))
-  (incf (get-x wall) (vx wall))
-  (incf (get-y wall) (vy wall))
-  (decf (frame wall))
-  (when (zerop (frame wall))
-    (setf (vx wall) (- (vx wall))
-	  (vy wall) (- (vy wall))
-	  (frame wall) (routine wall)
-	  (stop-frame wall) (stop-time wall))))
+  (call-next-method)
+  (funcall (move-function wall)))
 
 (define-class damage-wall (wall)
   (atk 20))

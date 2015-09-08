@@ -2,7 +2,7 @@
 
 ;------------------key------------------
 (defgeneric update-key-state (key keypress keystate))
-
+#|
 (defmacro defkeystate (name &rest keys)
   `(progn
      (defclass ,name ()
@@ -15,18 +15,10 @@
 	    ,@(loop for k in keys
 			 collect `(when (sdl:key= ,key ,(cadr k))
 					    (setf ,(car k) ,keypress))))))))
+|#
 
-(defkeystate titechfes-key
-    (right :sdl-key-right)
-  (left :sdl-key-left)
-  (jump :sdl-key-Lshift)
-  (down :sdl-key-down)
-  (dash :sdl-key-z)
-  (shot :sdl-key-x))
-
-#|
 (defmacro defkeystate (name &rest keymaps)
-  (with-gensym (key key-press key-state)
+  (with-gensyms (key key-press key-state)
     `(progn
        (defclass ,name ()
 	  ,(mapcar (lambda (x) `(,(car x) :initform 0)) keymaps))
@@ -36,11 +28,19 @@
 			     `((sdl:key= ,key ,(cadr keys))
 			       (setf ,(car keys) ,key-press)))
 			   keymaps))))
-       (defmethod next-key-state ((key-state key-state))
+       (defmethod next-key-state ((key-state ,name))
 	 (nmapslot (lambda (x) (mod x 2)) key-state)))))
 
 
-(defgeneric update-key-state (key key-press key-state))
+
+(defkeystate titechfes-key
+    (right :sdl-key-right)
+  (left :sdl-key-left)
+  (jump :sdl-key-c)
+  (down :sdl-key-down)
+  (dash :sdl-key-lshift)
+  (shot :sdl-key-x)
+  (weapon :sdl-key-z))
 
 
 (defun key-pressed-p (key)
@@ -49,4 +49,3 @@
   (= key 3))
 (defun key-up-p (key)
   (= key 2))
-|#
