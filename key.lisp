@@ -16,15 +16,6 @@
 			 collect `(when (sdl:key= ,key ,(cadr k))
 					    (setf ,(car k) ,keypress))))))))
 |#
-(defkeystate titechfes-key
-    (right :sdl-key-right)
-  (left :sdl-key-left)
-  (jump :sdl-key-c)
-  (down :sdl-key-down)
-  (dash :sdl-key-lshift)
-  (shot :sdl-key-x)
-  (weapon :sdl-key-z))
-
 
 (defmacro defkeystate (name &rest keymaps)
   (with-gensyms (key key-press key-state)
@@ -39,6 +30,17 @@
 			   keymaps))))
        (defmethod next-key-state ((key-state ,name))
 	 (nmapslot (lambda (x) (mod x 2)) key-state)))))
+
+
+
+(defkeystate titechfes-key
+    (right :sdl-key-right)
+  (left :sdl-key-left)
+  (jump :sdl-key-c)
+  (down :sdl-key-down)
+  (dash :sdl-key-lshift)
+  (shot :sdl-key-x)
+  (weapon :sdl-key-z))
 
 
 (defun key-pressed-p (key)

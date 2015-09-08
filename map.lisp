@@ -16,6 +16,7 @@
 		     `((string= ,(car xs) code)
 		       (make-instance ',(second xs)
 				      ,@(cddr xs) :x x :y y))) table)))
+
 (defun make-game-object (code x y)
   (map-char-table
    ("1" wall)

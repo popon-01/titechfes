@@ -8,5 +8,3 @@
 (defvar *width* 320)
 (defvar *height* 320)
 (defparameter *gravity* 1)
-(defparameter *enemy-mutekitime* 10)
-(defparameter *player-mutekitime* 10)
