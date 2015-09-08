@@ -38,6 +38,7 @@
   (left :sdl-key-left)
   (jump :sdl-key-c)
   (down :sdl-key-down)
+  (up :sdl-key-up)
   (dash :sdl-key-lshift)
   (shot :sdl-key-x)
   (weapon :sdl-key-z))

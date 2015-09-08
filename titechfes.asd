@@ -22,6 +22,7 @@
 	       (:file "collide")
 	       (:file "map")
 	       (:file "camera")
+	       (:file "state")
                (:file "titechfes"))
   :depends-on (:lispbuilder-sdl :split-sequence :iterate :alexandria :closer-mop))
 

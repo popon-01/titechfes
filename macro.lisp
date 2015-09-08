@@ -85,3 +85,10 @@
   `(do ()
        ((not ,test))
      ,@body))
+
+(defun to-s (obj)
+  (format nil "~a" obj))
+
+(defun distance (a b &optional (xfun #'get-x) (yfun #'get-y))
+  (sqrt (+ (expt (- (funcall xfun a) (funcall xfun b)) 2)
+	   (expt (- (funcall yfun a) (funcall yfun b)) 2))))

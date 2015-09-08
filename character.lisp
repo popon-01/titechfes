@@ -23,7 +23,9 @@
   (dec-muteki-frame chr)
   (alive-detect chr)
   (incf (get-x chr) (dx chr))
-  (incf (get-y chr) (dy chr)))
+  (incf (get-y chr) (dy chr))
+  (when (out-of-map-p chr game)
+    (kill chr)))
 
 (defmethod attack ((obj gameobject) (char gamecharacter))
   (when (not (muteki char))

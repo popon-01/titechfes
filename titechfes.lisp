@@ -15,25 +15,6 @@
 	       '(:enemy2-r "minienemy1.png")
 	       '(:ebul "ebul.png")))
 
-
-(defun draw-info (game)
-  (sdl:draw-box-* 180 15 100 10 :color sdl:*red*)
-  (sdl:draw-box-* 180 15 (clamp (truncate (* (hp (player game)) 100)
-					  (max-hp (player game)))
-				0 100) 10 
-				:color sdl:*green*)
-  (sdl:draw-string-solid-* "hp" 160 10 )
-  (sdl:draw-string-solid-* (format nil "~D" 
-				   (hp (player game)))
-			   280 10)
-  (sdl:draw-string-solid-* (shot-name (player game))
-			   320 10)
-  (sdl:draw-string-solid-* "Score" 160 30)
-  (sdl:draw-string-solid-* (format nil "~D" 
-				   (score (player game)))
-			   210 30))
-
-
 ;------------------main------------------
 (defun run ()
   (sdl:with-init ()
@@ -57,15 +38,7 @@
 	(:key-up-event (:key key)
 		       (update-key-state key 2
 			   (keystate game)))
-	(:idle (update-all game)
-	       (round-robin (rcurry #'collide game)
-			    (all-object game))
-	       (update-camera game)
-	       (when (not (alive (player game)))
-		 (sdl:push-quit-event))
-	       (sdl:clear-display sdl:*black*)
-	       (draw-all game)
-	       (draw-info game)
+	(:idle (run-state game)
 	       (sdl:update-display)
 	       (next-key-state (keystate game))
 	       )))))

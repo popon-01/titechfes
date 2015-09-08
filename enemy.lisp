@@ -40,6 +40,38 @@
 			     (list `(equal (state ,enem) ,state) val))
 			   states (cdr b)))))))
 
+(defun image-turn (char)
+  (setf (image char) 
+	(if (plusp (vx char)) 
+	    (image-r char)
+	    (image-l char))))
+
+;; kuribo
+
+(define-class kuribo (land-enemy)
+  (hp 30)
+  (atk 10)
+  (xspeed 1.4)
+  (vx 1.4)
+  (turn-% 1)
+  (image (get-image :enemy-l))
+  (image-r (get-image :enemy-r))
+  (image-l (get-image :enemy-l))
+  (find-player nil)
+  (search-range 100))
+
+(defmethod update-object ((e kuribo) game)
+  (call-next-method)
+  (image-turn e)
+  (if (find-player e)
+      (setf (vx e) 
+	    (pmif (<= (get-x e) (get-x (player game)))
+		  (xspeed e)))
+      (whens ((< (random 1000) (* 10 (turn-% e)))
+	      (setf (vx e) (- (vx e))))
+	     ((< (distance e (player game)) (search-range e))
+	      (setf (find-player e) t)))))
+
 ;;aomura
 
 (define-class aomura (land-enemy)
