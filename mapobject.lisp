@@ -56,13 +56,16 @@
       (sdl:draw-box-* (round (- cx (ash w -1))) 
 		      (round (- cy (ash h -1) 10)) 32 10
 			       :color sdl:*red*))))
-(define-class break-wall (wall gamecharacter)
-  (hp 100)
-  (muteki-time 0))
+
+(define-class break-wall (wall)
+  (hp 100))
+
+(defmethod attack ((obj gameobject) (wall break-wall))
+  (decf (hp wall) (atk obj)))
 
 (defmethod update-object ((wall break-wall) game)
-  (alive-detect wall)
-  (dec-muteki-frame wall))
+  (when (not (plusp (hp wall)))
+    (kill wall)))
 
 (define-class easy-break-wall (break-wall)
   (hp 30))
