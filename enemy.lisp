@@ -15,17 +15,17 @@
 
 (defmethod update-object ((enem land-enemy) game)
   (when (and (minusp (vy enem)) (zerop (dy enem)))
-    (setf (vy enem) 0))
+   (setf (vy enem) 0))
   (setf (in-air enem) (not (and (plusp (vy enem)) 
 				(zerop (dy enem)))))
   (incf (vy enem) *gravity*)
   (when (> (vy enem) 10) (setf (vy enem) 10))
   (call-next-method))
 
-(defmethod update-object :after ((enem enemy) game)
-  (setf (dx enem) (if (zerop (ax enem)) (vx enem) (ax enem)) 
-	(dy enem) (if (zerop (ay enem)) (vy enem) (ay enem))
-	(ax enem) 0 (ay enem) 0))
+(defmethod update-object  ((enem enemy) game)
+  (call-next-method)
+  (setf (dx enem) (vx enem) 
+	(dy enem) (vy enem)))
 
 (define-class enemy-bullet (bullet)
   (vx 0)
