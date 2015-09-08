@@ -1,31 +1,18 @@
-M・敵
-DONE 飛ぶ敵
-歩く敵
-飛び道具
-倒すとバラバラになる
-自爆
+M 着地硬直
+M ジャンプクールタイム削除
+M 既存の敵のノックバックの設定
 
-M
-天井で跳ね返る
-画像管理
-画像探す
+敵の製作
+W aomura
+D kuribo
+M kuribo-turret
+M 雑魚を産む敵
+W 硬いでかい
+D fly2
+D turret 固定
+W turret  自機狙い
+M fly-turret (fly-and-stop)
 
-W マップオブジェクト
-DONE 動く（自分が動かない）
-
-W・武器
-DONE 武器チェンジ
-DONE 操作周り
-
-W・マップDSL
-マップ製作
-W・アイテム
-DONE ジャンプ回数up
-DONE ジャンプ中ステップ回数up
-
-H
-小数単位の移動
-DONE axeでブロック壊せない問題
-(フックショット)
-(近距離広範囲)
-画面遷移
+H somebombの作成
+ステージの作成
+(素材)
