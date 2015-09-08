@@ -85,6 +85,8 @@
 
 (defmethod update-object ((ply player) game)
   (call-next-method)
+  (when (and (minusp (vy ply)) (zerop (dy ply)))
+    (setf (vy ply) 0))
   (when (not (while-dash ply))
     (setf (in-air ply) (not (and (plusp (vy ply)) 
 				 (zerop (dy ply))))))

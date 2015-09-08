@@ -53,13 +53,12 @@
 (defun univec (x y)
   (let ((dist (vec-abs x y)))
     (if (zerop dist)
-	(values 0.0 0.0)
-	(values (/ x dist) (/ y dist)))))
+	(list 0.0 0.0)
+	(list (/ x dist) (/ y dist)))))
 
 (defun dir-univec (sx sy tx ty)
-  (multiple-value-bind (res-x res-y) 
-      (univec (- tx sx) (- ty sy))
-    (values res-x res-y)))
+  (let ((vec (univec (- tx sx) (- ty sy))))
+    (list (first vec) (second vec))))
 
 (defun slot-list (instance)
   (mapcar #'c2mop:slot-definition-name
@@ -69,6 +68,7 @@
   (dolist (slot (slot-list instance))
     (setf (slot-value instance slot)
 	  (funcall fn (slot-value instance slot)))))
+
 (defmacro pmif (test num)
   (with-gensyms (gnum)
     `(let ((,gnum ,num))

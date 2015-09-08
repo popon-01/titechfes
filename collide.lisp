@@ -143,7 +143,7 @@
 (defcollide (enem enemy) (bul bomb)
   (when (rect-collide enem bul)
     (cond ((equal (state bul) "bomb") 
-v	   (make-explosion bul))
+	   (make-explosion bul))
 	  ((equal (state bul) "explosion")
 	   (decf (hp enem) (atk bul))))))
 
@@ -157,6 +157,7 @@ v	   (make-explosion bul))
 			    (truncate (height bul) 2)
 			    (- (get-y bul)))))
 	 ((rect-collide bul chip) (kill bul))))
+
   
 
 (defcollide (bul boomerang) (chip wall)
