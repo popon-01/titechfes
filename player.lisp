@@ -158,3 +158,8 @@
 		       (update-bullet player))))
 	  (progn (setf (elt blis bi) bsym)
 		 (update-bullet player))))))
+
+(defmethod knock-back ((obj gameobject) (ply player))
+  (setf (ax ply) (pmif (plusp (- (get-x ply) (get-x obj)))
+		       (knock-back-atk obj))
+	(ay ply) -10))

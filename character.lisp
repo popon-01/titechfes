@@ -33,8 +33,9 @@
   (when (not (muteki char))
     (decf (hp char) (atk obj))
     (setf (muteki char) t
-	  (muteki-count char) (muteki-time char)
-	  (ax char) (pmif (plusp (- (get-x char) (get-x obj)))
-			  (knock-back-atk obj))
-	  (ay char) -10)))
+	  (muteki-count char) (muteki-time char))
+    (knock-back obj char)))
+
+(defmethod knock-back ((obj gameobject) (char gamecharacter)))
+
 
