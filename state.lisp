@@ -58,14 +58,27 @@
 	     ((key-down-p down) (incf cursor))
 	     ((key-down-p jump) (choice-stage game)))
       (setf cursor (mod cursor 3)))
-    (sdl:draw-string-solid-* 
+    (sdl:draw-string-solid-* "stage 1" 
+			     (x-center game -60)
+			     (y-center game 30))
+    (sdl:draw-string-solid-* "stage 2" 
+			     (x-center game -60)
+			     (y-center game 50))
+    (sdl:draw-string-solid-* "stage 3" 
+			     (x-center game -60)
+			     (y-center game 70))
+    (sdl:draw-string-solid-* "->" 
+			     (x-center game -90)
+			     (y-center game (nth cursor '(30 50 70)))))
+#|    (sdl:draw-string-solid-* 
      (concatenate 'string "stage " (to-s (1+ cursor)))
      (x-center game -60)
      (y-center game 30)
      :color sdl:*green*))
-
+|#
   (defun choice-stage (game)
-    (let* ((name (concatenate 'string "stage" (to-s (1+ cursor)))))
+    (let* ((name (concatenate 'string "stage" 
+			      (to-s (1+ cursor)))))
       (change-state :game game)
       (start-game name game)
       (setf cursor 0))))

@@ -67,22 +67,6 @@
     (attack ebul ply)
     (kill ebul)))
 
-;;enemy-behavior
-#|
-(defcollide (enem flying) (chip wall)
-  (with-slots (dx dy vx vy) enem
-    (when (not (try-move enem chip :dx1 dx :dy1 dy))
-      (let ((dir-x (- (get-x chip) (get-x enem)))
-	    (dir-y (- (get-y chip) (get-y enem))))
-	(if (< (abs dir-x) (abs dir-y))
-	    (progn 
-	      (adjust-dy enem chip)
-	      (setf vy (* 3 (- vy))))
-	    (progn
-	      (adjust-dx enem chip)
-	      (setf vx (* 3 (- vx)))))))))
-|#
-
 (defcollide (wall damage-wall) (player player)
   (call-next-method)
   (when (rect-collide= player wall)
@@ -112,7 +96,7 @@
 		 (and (= (1+ (jump-cool player))
 			 (jump-cooltime player))
 		      (< (get-y player) (get-y wall)))))
-    (attack 10 wall)))
+    (attack player wall)))
 
 ;;enemy-bullet-behavior
 (defcollide (ebul enemy-bullet) (chip wall)
@@ -167,5 +151,3 @@
   (when (rect-collide item p) 
     (item-effect item p game)
     (kill item)))
-
-
