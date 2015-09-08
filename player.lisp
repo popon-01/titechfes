@@ -25,6 +25,7 @@
   (dir-right t)
   (muteki nil)
   (muteki-count 0)
+  (muteki-time 50)
   (score 0)
   (bullet-list (vector 'knife nil nil))
   (bullet-i 0)
@@ -57,12 +58,12 @@
 	   (decf jump-length)
 	   (decf jump-count))
 	  ;;while-jump
-	  ((and (key-pressed-p jump) (< jump-length jump-lengthtime))
+	  ((and (key-pressed-p jump) (< 0 jump-length jump-lengthtime))
 	   (setf vy jump-accel)
 	   (decf jump-length))
 	  ;;jump-end
 	  ((or (and (key-up-p jump) (< jump-length jump-lengthtime))
-	       (zerop jump-length))
+	       (<= jump-length 0))
 	   (setf jump-length jump-lengthtime))
 	  ((key-down-p weapon) (change-bullet ply))
 	  ((and (key-down-p dash) (plusp dash-count) (zerop dash-cool))
@@ -102,7 +103,8 @@
 (defmethod update-object ((ply player) game)
   (call-next-method)
   (when (and (in-air ply) (minusp (vy ply)) (zerop (dy ply)))
-    (setf (vy ply) 0))
+    (setf (vy ply) 0
+	  (jump-length ply) 0))
   (when (not (while-dash ply))
     (setf (in-air ply) (not (and (plusp (vy ply)) 
 				 (zerop (dy ply))))))

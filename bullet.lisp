@@ -5,7 +5,6 @@
   (vy 0)
   (atk 0)
   (penetrate nil)
-  (knock-back 15)
   (cool-time 0))
 
 

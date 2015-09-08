@@ -4,6 +4,8 @@
   (hp 100)
   (dx 0)
   (dy 0)
+  (ax 0)
+  (ay 0)
   (rvx 0)
   (rvy 0)
   (muteki nil)
@@ -31,10 +33,8 @@
   (when (not (muteki char))
     (decf (hp char) (atk obj))
     (setf (muteki char) t
-	  (muteki-count char) (muteki-time char))))
+	  (muteki-count char) (muteki-time char)
+	  (ax char) (pmif (plusp (- (get-x char) (get-x obj)))
+			  (knock-back-atk obj))
+	  (ay char) -10)))
 
-(defmethod attack ((num integer) (char gamecharacter))
-  (when (not (muteki char))
-    (decf (hp char) num)
-    (setf (muteki char) t
-	  (muteki-count char) (muteki-time char))))

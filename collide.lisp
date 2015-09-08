@@ -58,12 +58,6 @@
     (incf (rvx chr) (vx chip))
     (incf (rvy chr) (vy chip))))
 
-(defmethod attack :before ((enem enemy) (ply player))
-  (when (not (muteki ply))
-    (setf (ax ply) (pmif (minusp (- (vx ply) (vx enem)))
-			 (knock-back enem))
-	  (ay ply) -15)))
-
 (defcollide (ply player) (enem enemy)
   (when (rect-collide ply enem)
     (attack enem ply)))

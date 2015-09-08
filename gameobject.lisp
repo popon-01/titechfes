@@ -23,7 +23,9 @@
   width
   height
   (alive t)
-  image)
+  image
+  (atk 10)
+  (knock-back-atk 20))
 
 (defmethod initialize-instance :after ((obj gameobject) &key)
   (with-slots (image width height) obj

@@ -6,7 +6,6 @@
   (dy 0) (vy 0)
   (hp 100)
   (atk 0)
-  (knock-back 20)
   (dir-right t)
   (muteki nil)
   (muteki-count 0))
