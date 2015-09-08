@@ -23,8 +23,9 @@
   (call-next-method))
 
 (defmethod update-object :after ((enem enemy) game)
-  (setf (dx enem) (vx enem) 
-	(dy enem) (vy enem)))
+  (setf (dx enem) (if (zerop (ax enem)) (vx enem) (ax enem)) 
+	(dy enem) (if (zerop (ay enem)) (vy enem) (ay enem))
+	(ax enem) 0 (ay enem) 0))
 
 (define-class enemy-bullet (bullet)
   (vx 0)

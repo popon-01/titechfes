@@ -34,7 +34,8 @@
   (vx 7)
   (life 20)
   (atk 20)
-  (cool-time 10))
+  (cool-time 10)
+  (knock-back-atk 30))
 
 (defmethod update-object ((bul knife) game)
   (call-next-method)
