@@ -11,6 +11,7 @@
 	       (setf (first (map-size game)) (+ 16 w))
 	       (push-game-object (make-game-object code w h)
 				 game)))))
+
 (defmacro map-char-table (&rest table)
   `(cond ,@(mapcar (lambda (xs)
 		     `((string= ,(car xs) code)
@@ -24,6 +25,8 @@
    ("a" aomura)
    ("t" tullet)
    ("f" flying2)
+   ("o" fly-and-stop)
+   ("d" kuribo)
    ("i" item)
    ("m" move-wall :vx 1)
    ("k" weapon-item :weapon 'knife)

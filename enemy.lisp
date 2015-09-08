@@ -18,8 +18,8 @@
   (when (> (vy enem) 10) (setf (vy enem) 10)))
 
 (defmethod update-object :after ((enem enemy) game)
-  (setf (dx enem) (floor (vx enem)) 
-	(dy enem) (floor (vy enem))))
+  (setf (dx enem) (round (vx enem)) 
+	(dy enem) (round (vy enem))))
 
 (define-class enemy-bullet (bullet)
   (vx 0)
@@ -33,6 +33,38 @@
 	   (cond ,@(mapcar (lambda (state val) 
 			     (list `(equal (state ,enem) ,state) val))
 			   states (cdr b)))))))
+
+(defun image-turn (char)
+  (setf (image char) 
+	(if (plusp (vx char)) 
+	    (image-r char)
+	    (image-l char))))
+
+;; kuribo
+
+(define-class kuribo (land-enemy)
+  (hp 30)
+  (atk 10)
+  (xspeed 1.4)
+  (vx 1.4)
+  (turn-% 1)
+  (image (get-image :enemy-l))
+  (image-r (get-image :enemy-r))
+  (image-l (get-image :enemy-l))
+  (find-player nil)
+  (search-range 100))
+
+(defmethod update-object ((e kuribo) game)
+  (call-next-method)
+  (image-turn e)
+  (if (find-player e)
+      (setf (vx e) 
+	    (pmif (<= (get-x e) (get-x (player game)))
+		  (xspeed e)))
+      (whens ((< (random 1000) (* 10 (turn-% e)))
+	      (setf (vx e) (- (vx e))))
+	     ((< (distance e (player game)) (search-range e))
+	      (setf (find-player e) t)))))
 
 ;;aomura
 
@@ -95,7 +127,7 @@
   (call-next-method)
   (incf (y-theta enem) (updown-omega enem))
   (setf (y-theta enem) (mod (y-theta enem) 360))
-  (setf (vy enem) (floor (* pi (cos (rad (y-theta enem))))))
+  (setf (vy enem) (round (* pi (cos (rad (y-theta enem))))))
   (incf (vx enem) (if (< (get-x enem) (get-x (player game))) 0.2 -0.2))
   (setf (vx enem) (clamp (vx enem) -5 5)))
 
@@ -118,8 +150,8 @@
       (let ((move-dir
 	    (dir-univec (get-x enem) (get-y enem)
 			(get-x (player game)) (get-y (player game)))))
-	(let ((new-vx (floor (* (velocity enem) (first move-dir))))
-	      (new-vy (floor (* (velocity enem) (second move-dir)))))
+	(let ((new-vx (round (* (velocity enem) (first move-dir))))
+	      (new-vy (round (* (velocity enem) (second move-dir)))))
 	  (change-enemy-state enem (:fly :stop)
 	    (state :stop :fly)
 	    (act-routine (stop-time enem) (fly-time enem))

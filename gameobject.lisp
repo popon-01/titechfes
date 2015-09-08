@@ -33,16 +33,25 @@
 (defmethod draw-object ((obj gameobject) game)
   (with-slots (x y width height image) obj
     (sdl:draw-surface-at-* image
-			   (- (x-in-camera x game) 
+			   (- (x-in-camera x game)
 			      (/ width 2))
-			   (- (y-in-camera y game) 
+			   (- (y-in-camera y game)
 			      (/ height 2)))))
 
 (defmethod update-object ((obj gameobject) game)
   (incf (get-x obj) (vx obj))
-  (incf (get-y obj) (vy obj)))
+  (incf (get-y obj) (vy obj))
+  (when (out-of-map-p obj game)
+    (kill obj)))
 
 (defmethod kill ((obj gameobject)) (setf (alive obj) nil))
+
+(defmethod out-of-map-p ((obj gameobject) game)
+  (let ((border 40))
+    (not (and (< (- border) (get-x obj) 
+		 (+ (first (map-size game)) border))
+	      (< (- border) (get-y obj)
+		 (+ (second (map-size game)) border))))))
 
 ;------------------collide------------------
 (defgeneric rect-collide (a b))
