@@ -37,7 +37,6 @@
     (cond ((plusp res) :y)
 	  ((minusp res) :x))))
 
-
 (defgeneric collide (obj-a obj-b game))
 (defcollide (obj-a gameobject) (obj-b gameobject))
 
@@ -59,23 +58,23 @@
     (incf (rvx chr) (vx chip))
     (incf (rvy chr) (vy chip))))
 
+(defmethod attack :before ((enem enemy) (ply player))
+  (when (not (muteki ply))
+    (setf (ax ply) (pmif (minusp (- (vx ply) (vx enem)))
+			 (knock-back enem))
+	  (ay ply) -15)))
+
 (defcollide (ply player) (enem enemy)
   (when (rect-collide ply enem)
-    (attack enem ply)
-#|
-    (multiple-value-bind (dir-x dir-y)
-	(dir-univec (get-x enem) (get-y enem)
-		    (get-x ply) (get-y ply))
-      (incf (vvx ply) (floor (* 10 dir-x)))
-      (setf (vy ply) (floor (* 10 dir-y))))))
-|#
-))
+    (attack enem ply)))
+
 (defcollide (ply player) (ebul enemy-bullet)
   (when (rect-collide ply ebul)
     (attack ebul ply)
     (kill ebul)))
 
 ;;enemy-behavior
+#|
 (defcollide (enem flying) (chip wall)
   (with-slots (dx dy vx vy) enem
     (when (not (try-move enem chip :dx1 dx :dy1 dy))
@@ -88,6 +87,7 @@
 	    (progn
 	      (adjust-dx enem chip)
 	      (setf vx (* 3 (- vx)))))))))
+|#
 
 (defcollide (wall damage-wall) (player player)
   (call-next-method)

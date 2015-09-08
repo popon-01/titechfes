@@ -53,7 +53,8 @@
       wall
     (let* ((cx (x-in-camera x game))
 	   (cy (y-in-camera y game)))
-      (sdl:draw-box-* (- cx (ash w -1)) (- cy (ash h -1) 10) 32 10
+      (sdl:draw-box-* (round (- cx (ash w -1))) 
+		      (round (- cy (ash h -1) 10)) 32 10
 			       :color sdl:*red*))))
 (define-class break-wall (wall gamecharacter)
   (hp 100)

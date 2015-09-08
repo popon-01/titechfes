@@ -4,8 +4,8 @@
   (image (get-image :wall)))
 
 (defmethod draw-object ((item item) game)
-  (sdl:draw-filled-circle-* (x-in-camera (get-x item) game)
-			    (y-in-camera (get-y item) game)
+  (sdl:draw-filled-circle-* (round (x-in-camera (get-x item) game))
+			    (round (y-in-camera (get-y item) game))
 			    10
 			    :color sdl:*green*))
 
@@ -30,8 +30,8 @@
 (define-class score-item (item)
   (point 50))
 (defmethod draw-object ((item score-item) game)
-  (sdl:draw-filled-circle-* (x-in-camera (get-x item) game)
-			    (y-in-camera (get-y item) game)
+  (sdl:draw-filled-circle-* (round (x-in-camera (get-x item) game))
+			    (round (y-in-camera (get-y item) game))
 			    10
 			    :color sdl:*yellow*))
 

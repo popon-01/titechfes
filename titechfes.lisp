@@ -1,5 +1,7 @@
 (in-package :titechfes)
 
+(defparameter *game* nil)
+
 (defun gameimage-load ()
   (load-images '(:wall "wall_g.png")
 	       '(:knife "knife.png")
@@ -43,6 +45,7 @@
       (load-map (lib-path "stage1.txt") game)
       (init-camera game)
       (sdl:update-display)
+      (setf *game* game)
       (sdl:with-events ()
 	(:quit-event () t)
 	(:video-expose-event () (sdl:update-display))
