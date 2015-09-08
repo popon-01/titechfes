@@ -23,7 +23,7 @@
    ("p" player)
    ("a" aomura)
    ("t" tullet)
-   ("f" flying2)
+   ("f" fly-and-stop)
    ("i" item)
    ("m" move-wall :vx 1)
    ("k" weapon-item :weapon 'knife)

@@ -33,9 +33,9 @@
 (defmethod draw-object ((obj gameobject) game)
   (with-slots (x y width height image) obj
     (sdl:draw-surface-at-* image
-			   (- (x-in-camera x game) 
+			   (- (round (x-in-camera x game)) 
 			      (/ width 2))
-			   (- (y-in-camera y game) 
+			   (- (round (y-in-camera y game)) 
 			      (/ height 2)))))
 
 (defmethod update-object ((obj gameobject) game)

@@ -18,8 +18,8 @@
   (when (> (vy enem) 10) (setf (vy enem) 10)))
 
 (defmethod update-object :after ((enem enemy) game)
-  (setf (dx enem) (floor (vx enem)) 
-	(dy enem) (floor (vy enem))))
+  (setf (dx enem) (vx enem) 
+	(dy enem) (vy enem)))
 
 (define-class enemy-bullet (bullet)
   (vx 0)
@@ -60,8 +60,7 @@
     (whens ((plusp turn-routine) (decf turn-routine))
 	   ((plusp jump-routine) (decf jump-routine)))))
 
-;;flying
-
+#|
 (define-class flying (enemy)
   (image (get-image :enemy2-l))
   (image-l (get-image :enemy2-l))
@@ -81,6 +80,7 @@
 	    (vy enem) (* 2 (second uvec)))))
   (setf (image enem) (if (plusp (vx enem))
 			 (image-r enem) (image-l enem))))
+|#
 
 ;;flying2
 (define-class flying2 (enemy)
@@ -95,7 +95,7 @@
   (call-next-method)
   (incf (y-theta enem) (updown-omega enem))
   (setf (y-theta enem) (mod (y-theta enem) 360))
-  (setf (vy enem) (floor (* pi (cos (rad (y-theta enem))))))
+  (setf (vy enem) (* pi (cos (rad (y-theta enem)))))
   (incf (vx enem) (if (< (get-x enem) (get-x (player game))) 0.2 -0.2))
   (setf (vx enem) (clamp (vx enem) -5 5)))
 
@@ -118,8 +118,8 @@
       (let ((move-dir
 	    (dir-univec (get-x enem) (get-y enem)
 			(get-x (player game)) (get-y (player game)))))
-	(let ((new-vx (floor (* (velocity enem) (first move-dir))))
-	      (new-vy (floor (* (velocity enem) (second move-dir)))))
+	(let ((new-vx (* (velocity enem) (first move-dir)))
+	      (new-vy (* (velocity enem) (second move-dir))))
 	  (change-enemy-state enem (:fly :stop)
 	    (state :stop :fly)
 	    (act-routine (stop-time enem) (fly-time enem))
