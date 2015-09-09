@@ -23,7 +23,6 @@
     (gameimage-load)
     (setf (sdl:frame-rate) 60)
     (let ((game (make-instance 'game)))
-      (load-map (lib-path "stage1.txt") game)
       (init-camera game)
       (sdl:update-display)
       (setf *game* game)

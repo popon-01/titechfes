@@ -1,6 +1,13 @@
 (in-package titechfes)
 
 (defun load-map (file-name game)
+  (cond ((string= "txt" (pathname-type file-name))
+	 (load-txt-map file-name game))
+	((string= "stg" (pathname-type file-name))
+	 (load-stg-map file-name game))
+	(t (error "~a is not stage file." file-name))))
+
+(defun load-txt-map (file-name game)
   (setf (map-size game) (list 0 0))
   (iter (for h upfrom 16 by 32)
 	(for line in-file file-name using #'read-line)
@@ -11,6 +18,21 @@
 	       (setf (first (map-size game)) (+ 16 w))
 	       (push-game-object (make-game-object code w h)
 				 game)))))
+
+(defun load-stg-map (file-name game)
+  (setf (map-size game) (list 0 0)) 
+  (iter (for h upfrom 16 by 32)
+	(for line in-file file-name using #'read-line)
+	(setf (second (map-size game)) (+ 16 h)
+	      (first (map-size game)) (length line))
+	(appending
+	 (iter (for w upfrom 16 by 32)
+	       (for code in-string line)
+	       (setf (first (map-size game)) (+ 16 w))
+	       (push-game-object (make-game-object 
+				  (string code) w h)
+				 game)))))
+
 
 (defmacro map-char-table (&rest table)
   `(cond ,@(mapcar (lambda (xs)
@@ -24,6 +46,7 @@
    ("p" player)
    ("a" aomura)
    ("t" tullet)
+   ("n" snipe-tullet)
    ("f" flying2)
    ("o" fly-and-stop)
    ("d" kuribo)
@@ -68,5 +91,3 @@
 (defmethod push-game-object ((b enemy-bullet) (game game))
   (push b (enemy-bullets game))
   (call-next-method))
-
-

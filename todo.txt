@@ -9,8 +9,8 @@ M kuribo-turret
 M 雑魚を産む敵
 W 硬いでかい
 D fly2
-D turret 固定
-W turret  自機狙い
+D tullet 固定
+D W tullet  自機狙い
 M fly-turret (fly-and-stop)
 
 H somebombの作成

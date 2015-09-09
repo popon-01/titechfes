@@ -89,6 +89,10 @@
 (defun to-s (obj)
   (format nil "~a" obj))
 
+(defun a-to-b-vector (a b &optional (xfun #'get-x) (yfun #'get-y))
+  (list (- (funcall xfun b) (funcall xfun a))
+	(- (funcall yfun b) (funcall yfun a))))
+
 (defun distance (a b &optional (xfun #'get-x) (yfun #'get-y))
   (sqrt (+ (expt (- (funcall xfun a) (funcall xfun b)) 2)
 	   (expt (- (funcall yfun a) (funcall yfun b)) 2))))
