@@ -14,13 +14,15 @@
   (in-air t))
 
 (defmethod update-object ((enem land-enemy) game)
+  (call-next-method)
   (when (and (minusp (vy enem)) (zerop (dy enem)))
    (setf (vy enem) 0))
   (setf (in-air enem) (not (and (plusp (vy enem)) 
 				(zerop (dy enem)))))
-  (incf (vy enem) *gravity*)
-  (when (> (vy enem) 10) (setf (vy enem) 10))
-  (call-next-method))
+  (if (in-air enem)
+      (incf (vy enem) *gravity*) (setf (vy enem) 0.1))
+  (when (> (vy enem) 10) (setf (vy enem) 10)))
+
 
 (defmethod update-object  ((enem enemy) game)
   (call-next-method)
@@ -63,14 +65,21 @@
 (defmethod update-object ((e kuribo) game)
   (call-next-method)
   (image-turn e)
-  (if (find-player e)
-      (setf (vx e) 
-	    (pmif (<= (get-x e) (get-x (player game)))
-		  (xspeed e)))
-      (whens ((< (random 1000) (* 10 (turn-% e)))
-	      (setf (vx e) (- (vx e))))
-	     ((< (distance e (player game)) (search-range e))
-	      (setf (find-player e) t)))))
+  (print (vy e))
+  (when (not (muteki e))
+    (if (find-player e)
+	(setf (vx e) 
+	      (pmif (<= (get-x e) (get-x (player game)))
+		    (xspeed e)))
+	(whens ((< (random 1000) (* 10 (turn-% e)))
+		(setf (vx e) (- (vx e))))
+	       ((< (distance e (player game)) (search-range e))
+		(setf (find-player e) t))))))
+
+(defmethod knock-back ((obj gameobject) (e kuribo))
+  (setf (vx e) (pmif (plusp (- (get-x e) (get-x obj)))
+		     (knock-back-atk obj))
+	(vy e) -10))
 
 ;;aomura
 

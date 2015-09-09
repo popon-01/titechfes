@@ -33,9 +33,9 @@
   (image (get-image :knife))
   (vx 7)
   (life 20)
-  (atk 20)
+  (atk 0)
   (cool-time 10)
-  (knock-back-atk 30))
+  (knock-back-atk 5))
 
 (defmethod update-object ((bul knife) game)
   (call-next-method)
