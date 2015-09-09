@@ -11,12 +11,12 @@
   (dx 0) (vx 0) (ax 0)
   (dy 0) (vy 0) (ay *gravity*)
   (in-air t)
-  (jump-cool 0) (jump-cooltime 20)
+  (jump-cool 0) (jump-cooltime 5)
   (jump-count 2) (max-jump 2)
   (jump-accel -10)
   (jump-length 12) (jump-lengthtime 12)
   (while-dash nil)
-  (dash-cool 0) (dash-cooltime 5)
+  (dash-cool 0) (dash-cooltime 40)
   (dash-count 1) (max-dash 2)
   (dash-accel 20)
   (shot-name "Knife")
@@ -34,7 +34,7 @@
 (defun player-keyevents (ply game)
   (with-slots (vx vy ax ay  velocity 
 		  jump-count jump-accel
-		  jump-cool jump-cooltime
+		  jump-cool
 		  jump-length jump-lengthtime
 		  while-dash
 		  dash-count dash-accel
@@ -53,7 +53,6 @@
 	  ((and (key-down-p jump) (plusp jump-count)
 		(zerop jump-cool) (= jump-length jump-lengthtime))
 	   (setf while-dash nil
-		 jump-cool jump-cooltime
 		 vy jump-accel)
 	   (decf jump-length)
 	   (decf jump-count))
@@ -122,6 +121,8 @@
     (decf (jump-count ply))))
 
 (defun player-landed (ply)
+  (when (< (jump-count ply) (max-jump ply))
+    (setf (jump-cool ply) (jump-cooltime ply)))
   (setf (jump-count ply) (max-jump ply)
 	(dash-count ply) (max-dash ply)
 	(dash-cooltime ply) 40
