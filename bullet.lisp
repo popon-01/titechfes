@@ -3,7 +3,7 @@
 (define-class bullet (gameobject)
   (vx 0)
   (vy 0)
-  (atk 0)
+  (atk 20)
   (penetrate nil)
   (cool-time 0)
   (knock-back-atk 10))
