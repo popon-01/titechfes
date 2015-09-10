@@ -34,7 +34,7 @@
   (image (get-image :knife))
   (vx 7)
   (life 20)
-  (atk 0)
+  (atk 20)
   (cool-time 10)
   (knock-back-atk 5))
 

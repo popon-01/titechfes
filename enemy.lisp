@@ -101,9 +101,9 @@
 ;;kuribo-tullet
 
 (define-class kuribo-tullet (kuribo)
-  (bul-velocity 10)
+  (bullet-speed 5)
   (shot-time 60)
-  (shot-routine 60))
+  (shot-routine (charge-timer 60)))
 
 (define-class kuribo-bullet (enemy-bullet)
   (image (get-image :ebul))
@@ -111,21 +111,22 @@
 
 (defmethod update-object ((e kuribo-tullet) game)
   (call-next-method)
-  (when (find-player e)
-    (if (plusp (shot-routine e))
-	(decf (shot-routine e))
-	(let* ((shot-theta (+ (random 40) 300))
-	       (bul-vx (* (bul-velocity e) (cos (rad shot-theta))))
-	       (bul-vy (* (bul-velocity e) (sin (rad shot-theta))))
-	       (ebul (make-instance 'kuribo-bullet
-				    :x (get-x e) :y (get-y e)
-				    :vx (pmif 
-					 (<= (get-x e)
-					     (get-x (player game)))
-					 bul-vx)
-				    :vy bul-vy)))
-	  (push-game-object ebul game)
-	  (setf (shot-routine e) (shot-time e))))))
+  (funcall (shot-routine e) :charge)
+  (and (find-player e)
+       (funcall (shot-routine e) :shot)
+       (let* ((bul-vx (pmif (<= (get-x e) 
+				(get-x (player game)))
+			    (* (bullet-speed e)
+			       (clamp (random 1.5) 1 1.5))))
+	      (bul-vy (- (* (bullet-speed e)
+			    (clamp (random 1.5) 1 1.5))))
+	      (ebul (make-instance 
+		     'kuribo-bullet
+		     :x (+ (get-x e) (* 4 bul-vx))
+		     :y (+ (get-y e) (* 4 bul-vy))
+		     :vx bul-vx
+		     :vy bul-vy)))
+	 (push-game-object ebul game))))
 
 (defmethod update-object ((ebul kuribo-bullet) game)
   (setf (vy ebul) (clamp (+ (vy ebul) *gravity*) -10 10))
@@ -185,7 +186,7 @@
   (image-r (get-image :enemy2-r))
   (velocity 2)
   (vec-x 0) (vec-y 0)
-  (bul-velocity 5)
+  (bullet-speed 5)
   (shot-routine 40)
   (state :stop)
   (act-routine 0)
@@ -196,6 +197,19 @@
 (define-class fas-bullet (enemy-bullet)
   (image (get-image :ebul))
   (atk 10))
+
+(defun shot-to-player (enem bullet game)
+  (let ((ebul (make-instance bullet))
+	(uvec (uvec enem (player game))))
+    (setf (get-x ebul) (+ (get-x enem)
+			  (* 30 (first uvec)))
+	  (get-y ebul) (+ (get-y enem)
+			  (* 30 (second uvec)))
+	  (vx ebul)
+	  (* (bullet-speed enem) (first uvec))
+	  (vy ebul) 
+	  (* (bullet-speed enem) (second uvec)))
+    (push-game-object ebul game)))
 
 (defun change-fas-state (enem game)
   (let* ((to-player-dir
@@ -211,25 +225,12 @@
       (vec-x new-vx 0)
       (vec-y new-vy 0))))
 
-(defun fas-shot (enem game)
-  (let* ((to-player-dir
-	  (dir-univec (get-x enem)
-		      (get-y enem)
-		      (get-x (player game))
-		      (get-y (player game))))
-	 (bul-vx (* (bul-velocity enem) (first to-player-dir)))
-	 (bul-vy (* (bul-velocity enem) (second to-player-dir)))
-	 (ebul (make-instance 'fas-bullet
-			      :x (get-x enem) :y (get-y enem)
-			      :vx bul-vx :vy bul-vy)))
-      (push-game-object ebul game)))
-
 (defmethod update-object ((enem fly-and-stop) game)
   (call-next-method)
   (when (and (equal (state enem) :stop)
 	     (zerop (mod (+ (act-routine enem) 30)
 			 (shot-routine enem))))
-    (fas-shot enem game))
+    (shot-to-player enem 'fas-bullet game))
   (when (not (muteki enem))
     (if (plusp (act-routine enem))
 	(progn
@@ -345,5 +346,5 @@
   (call-next-method)
   (search-player b game)
   (image-turn b)
-  (if (find-player b) 
+  (if (find-player b) 1 2
       ))
