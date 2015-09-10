@@ -97,6 +97,11 @@
   (sqrt (+ (expt (- (funcall xfun a) (funcall xfun b)) 2)
 	   (expt (- (funcall yfun a) (funcall yfun b)) 2))))
 
+(defun uvec (a b &optional (xfun #'get-x) (yfun #'get-y))
+  (let ((dis (distance a b xfun yfun)))
+    (mapcar (lambda (x) (float (/ x dis)))
+	    (a-to-b-vector a b xfun yfun))))
+
 (defun make-timer (num)
   (let ((i 0))
     (lambda ()
@@ -104,7 +109,12 @@
 	  (progn (setf i 1) t)
 	  (progn (incf i) nil)))))
 
-
-
-
-
+(defun charge-timer (num)
+  (let ((charge num))
+    (lambda (message)
+      (case message
+	(:charge (progn (setf charge (clamp (1+ charge) 0 num))
+			(<= num charge)))
+	(:shot (and (<= num charge)
+		    (setf charge 0)
+		    t))))))
