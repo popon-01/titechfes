@@ -42,7 +42,7 @@
     (setf (vx e) (* (knock-back-atk obj) (first knock-dir))
 	  (vy e) (* (knock-back-atk obj) (second knock-dir)))))
 
-(define-class enemy-bullet (gameobject)
+(define-class enemy-bullet (bullet)
   (vx 0)
   (vy 0)
   (atk 0))
@@ -345,5 +345,5 @@
   (call-next-method)
   (search-player b game)
   (image-turn b)
-  (if (find-player b)
+  (if (find-player b) 
       ))
