@@ -48,11 +48,19 @@
 (let ((cursor 0))
   (defun title-state (game)
     (sdl:clear-display sdl:*black*)
+    (let* ((logo (get-image :title))
+	   (dx (- (ash (sdl:width logo) -1)))
+	   (dy (- (ash (sdl:height logo) -1))))
+      (sdl:draw-surface-at-* (get-image :title)
+			     (x-center game dx)
+			     (y-center game (- dy 60))))
+#|
     (sdl:draw-string-solid-* 
      "MATSUMURA"
      (x-center game -60)
      (y-center game)
      :color sdl:*green*)
+|#
     (with-slots (up down jump) (keystate game)
       (whens ((key-down-p up) (decf cursor))
 	     ((key-down-p down) (incf cursor))

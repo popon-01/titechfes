@@ -15,7 +15,8 @@
 	       '(:enemy2-r "minienemy1.png")
 	       '(:ebul "ebul.png")
 	       '(:big "big.png")
-	       '(:big-l "big-l.png")))
+	       '(:big-l "big-l.png")
+	       '(:title "title_touka.png")))
 
 ;------------------main------------------
 (defun run ()
