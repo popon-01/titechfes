@@ -67,6 +67,10 @@
     (attack ebul ply)
     (kill ebul)))
 
+(defcollide (e enemy) (ebul enemy-bullet)
+  (when (rect-collide e ebul)
+    (kill ebul)))
+
 (defcollide (wall damage-wall) (player player)
   (call-next-method)
   (when (rect-collide= player wall)

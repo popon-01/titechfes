@@ -13,7 +13,9 @@
 	       '(:enemy-r "enemy.png")
 	       '(:enemy2-l "minienemy2.png")
 	       '(:enemy2-r "minienemy1.png")
-	       '(:ebul "ebul.png")))
+	       '(:ebul "ebul.png")
+	       '(:big "big.png")
+	       '(:big-l "big-l.png")))
 
 ;------------------main------------------
 (defun run ()
@@ -23,7 +25,6 @@
     (gameimage-load)
     (setf (sdl:frame-rate) 60)
     (let ((game (make-instance 'game)))
-      (load-map (lib-path "stage1.txt") game)
       (init-camera game)
       (sdl:update-display)
       (setf *game* game)
