@@ -13,6 +13,8 @@
 (define-class land-enemy (enemy)
   (in-air t))
 
+(define-class air-enemy (enemy))
+
 (defmethod update-object ((enem land-enemy) game)
   (call-next-method)
   (when (and (minusp (vy enem)) (zerop (dy enem)))
@@ -29,7 +31,18 @@
   (setf (dx enem) (vx enem) 
 	(dy enem) (vy enem)))
 
-(define-class enemy-bullet (bullet)
+(defmethod knock-back ((obj gameobject) (e land-enemy))
+  (setf (vx e) (pmif (plusp (- (get-x e) (get-x obj)))
+		     (knock-back-atk obj))
+	(vy e) -10))
+
+(defmethod knock-back ((obj gameobject) (e air-enemy))
+  (let ((knock-dir (univec (- (vx obj) (vx e))
+			   (- (vy obj) (vy e)))))
+    (setf (vx e) (* (knock-back-atk obj) (first knock-dir))
+	  (vy e) (* (knock-back-atk obj) (second knock-dir)))))
+
+(define-class enemy-bullet (gameobject)
   (vx 0)
   (vy 0)
   (atk 0))
@@ -65,7 +78,6 @@
 (defmethod update-object ((e kuribo) game)
   (call-next-method)
   (image-turn e)
-  (print (vy e))
   (when (not (muteki e))
     (if (find-player e)
 	(setf (vx e) 
@@ -76,10 +88,42 @@
 	       ((< (distance e (player game)) (search-range e))
 		(setf (find-player e) t))))))
 
-(defmethod knock-back ((obj gameobject) (e kuribo))
-  (setf (vx e) (pmif (plusp (- (get-x e) (get-x obj)))
-		     (knock-back-atk obj))
-	(vy e) -10))
+(defmethod knock-back ((char gamecharacter) (e kuribo))
+  (call-next-method)
+  (setf (find-player e) t))
+
+;;kuribo-tullet
+
+(define-class kuribo-tullet (kuribo)
+  (bul-velocity 10)
+  (shot-time 60)
+  (shot-routine 60))
+
+(define-class kuribo-bullet (enemy-bullet)
+  (image (get-image :ebul))
+  (atk 20))
+
+(defmethod update-object ((e kuribo-tullet) game)
+  (call-next-method)
+  (when (find-player e)
+    (if (plusp (shot-routine e))
+	(decf (shot-routine e))
+	(let* ((shot-theta (+ (random 40) 300))
+	       (bul-vx (* (bul-velocity e) (cos (rad shot-theta))))
+	       (bul-vy (* (bul-velocity e) (sin (rad shot-theta))))
+	       (ebul (make-instance 'kuribo-bullet
+				    :x (get-x e) :y (get-y e)
+				    :vx (pmif 
+					 (<= (get-x e)
+					     (get-x (player game)))
+					 bul-vx)
+				    :vy bul-vy)))
+	  (push-game-object ebul game)
+	  (setf (shot-routine e) (shot-time e))))))
+
+(defmethod update-object ((ebul kuribo-bullet) game)
+  (setf (vy ebul) (clamp (+ (vy ebul) *gravity*) -10 10))
+  (call-next-method))
 
 ;;aomura
 
@@ -130,7 +174,7 @@
 |#
 
 ;;flying2
-(define-class flying2 (enemy)
+(define-class flying2 (air-enemy)
   (image (get-image :enemy2-l))
   (image-l (get-image :enemy2-l))
   (image-r (get-image :enemy2-r))
@@ -142,36 +186,72 @@
   (call-next-method)
   (incf (y-theta enem) (updown-omega enem))
   (setf (y-theta enem) (mod (y-theta enem) 360))
-  (setf (vy enem) (* pi (cos (rad (y-theta enem)))))
   (incf (vx enem) (if (< (get-x enem) (get-x (player game))) 0.2 -0.2))
-  (setf (vx enem) (clamp (vx enem) -5 5)))
+  (when (not (muteki enem))
+    (setf (vy enem) (* pi (cos (rad (y-theta enem)))))
+    (setf (vx enem) (clamp (vx enem) -5 5))))
+
+
 
 ;;fly-and-stop
-(define-class fly-and-stop (enemy)
+(define-class fly-and-stop (air-enemy)
   (image (get-image :enemy2-l))
   (image-l (get-image :enemy2-l))
   (image-r (get-image :enemy2-r))
   (velocity 2)
+  (vec-x 0) (vec-y 0)
+  (bul-velocity 5)
+  (shot-routine 40)
   (state :stop)
   (act-routine 0)
-  (fly-time 30)
-  (stop-time 30)
+  (fly-time 60)
+  (stop-time 60)
   (atk 20))
+
+(define-class fas-bullet (enemy-bullet)
+  (image (get-image :ebul))
+  (atk 10))
+
+(defun change-fas-state (enem game)
+  (let* ((to-player-dir
+	  (dir-univec (get-x enem)
+		      (get-y enem)
+		      (get-x (player game))
+		      (get-y (player game))))
+	 (new-vx (* (velocity enem) (first to-player-dir)))
+	 (new-vy (* (velocity enem) (second to-player-dir))))
+    (change-enemy-state enem (:fly :stop)
+      (state :stop :fly)
+      (act-routine (stop-time enem) (fly-time enem))
+      (vec-x new-vx 0)
+      (vec-y new-vy 0))))
+
+(defun fas-shot (enem game)
+  (let* ((to-player-dir
+	  (dir-univec (get-x enem)
+		      (get-y enem)
+		      (get-x (player game))
+		      (get-y (player game))))
+	 (bul-vx (* (bul-velocity enem) (first to-player-dir)))
+	 (bul-vy (* (bul-velocity enem) (second to-player-dir)))
+	 (ebul (make-instance 'fas-bullet
+			      :x (get-x enem) :y (get-y enem)
+			      :vx bul-vx :vy bul-vy)))
+      (push-game-object ebul game)))
 
 (defmethod update-object ((enem fly-and-stop) game)
   (call-next-method)
-  (if (plusp (act-routine enem))
-      (decf (act-routine enem))
-      (let ((move-dir
-	    (dir-univec (get-x enem) (get-y enem)
-			(get-x (player game)) (get-y (player game)))))
-	(let ((new-vx (* (velocity enem) (first move-dir)))
-	      (new-vy (* (velocity enem) (second move-dir))))
-	  (change-enemy-state enem (:fly :stop)
-	    (state :stop :fly)
-	    (act-routine (stop-time enem) (fly-time enem))
-	    (vx 0 new-vx)
-	    (vy 0 new-vy))))))
+  (when (and (equal (state enem) :stop)
+	     (zerop (mod (+ (act-routine enem) 30)
+			 (shot-routine enem))))
+    (fas-shot enem game))
+  (when (not (muteki enem))
+    (if (plusp (act-routine enem))
+	(progn
+	  (decf (act-routine enem))
+	  (setf (vx enem) (vec-x enem)
+		(vy enem) (vec-y enem)))
+	(change-fas-state enem game))))
 
 ;;tullet
 
@@ -194,7 +274,33 @@
 			      (truncate (width ebul) 2))
 	      (get-y ebul) (get-y enem))
 	(push-game-object ebul game)
-	(push ebul (enemy-bullets game))
 	(setf (shot-routine enem) 100))
       (decf (shot-routine enem))))
+
+(defmethod knock-back ((char gamecharacter) (e tullet)))
+
+
+;;demon-gate
+
+(define-class demon-gate (land-enemy)
+  (image (get-image :enemy-l))
+  (hp 400)
+  (atk 20)
+  (summon-routine 450)
+  (summon-time 450))
+
+(defmethod update-object ((e demon-gate) game)
+  (call-next-method)
+  (if (plusp (summon-routine e))
+      (decf (summon-routine e))
+      (let ((minion (make-instance 'kuribo
+			      :x (get-x e) :y(get-y e)
+			      :vx -1.4 :vy -10)))
+	(push-game-object minion game)
+	(setf (summon-routine e) (summon-time e)))))
+
+
+(defmethod knock-back ((char gamecharacter) (e demon-gate)))
+
+
 

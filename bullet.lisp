@@ -5,7 +5,8 @@
   (vy 0)
   (atk 0)
   (penetrate nil)
-  (cool-time 0))
+  (cool-time 0)
+  (knock-back-atk 10))
 
 
 ;---template---
