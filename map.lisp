@@ -50,6 +50,7 @@
    ("f" flying2)
    ("o" fly-and-stop)
    ("d" kuribo)
+   ("B" big)
    ("i" item)
    ("m" move-wall :vx 1)
    ("k" weapon-item :weapon 'knife)

@@ -96,3 +96,15 @@
 (defun distance (a b &optional (xfun #'get-x) (yfun #'get-y))
   (sqrt (+ (expt (- (funcall xfun a) (funcall xfun b)) 2)
 	   (expt (- (funcall yfun a) (funcall yfun b)) 2))))
+
+(defun make-timer (num)
+  (let ((i 0))
+    (lambda ()
+      (if (<= num i)
+	  (progn (setf i 1) t)
+	  (progn (incf i) nil)))))
+
+
+
+
+
