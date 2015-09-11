@@ -118,3 +118,41 @@
 	(:shot (and (<= num charge)
 		    (setf charge 0)
 		    t))))))
+(defmacro mapfn (&rest expr)
+  (with-gensyms (gs)
+    `(lambda (&rest ,gs)
+       (apply #',(car expr)
+	      (mapcar (fn ,(cdr expr)) ,gs)))))
+
+(defmacro fn (expr) `#',(rbuild expr))
+(defun rbuild (expr)
+  (if (or (atom expr) (eq (car expr) 'lambda))
+      expr
+      (if (eq (car expr) 'compose)
+	  (build-compose (cdr expr))
+	  (build-call (car expr) (cdr expr)))))
+(defun build-call (op fns)
+  (with-gensyms (g)
+    `(lambda (,g)
+       (,op ,@(mapcar #'(lambda (f)
+			  `(,(rbuild f) ,g))
+		      fns)))))
+(defun build-compose (fns)
+  (with-gensyms (g)
+    `(lambda (,g)
+       ,(labels ((rec (fns)
+		      (if fns
+			  `(,(rbuild (car fns))
+			     ,(rec (cdr fns)))
+			  g)))
+		(rec fns)))))
+
+
+(defmacro defstate (name lambda-list &body body)
+  (with-gensyms (glis)
+    `(defun ,name (&rest ,glis)
+       (if (and (not (cdr ,glis)) (eq :symbol (car ,glis)))
+	   ',name
+	   (destructuring-bind ,lambda-list ,glis
+	     ,@body)))))
+
