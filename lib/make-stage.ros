@@ -1,0 +1,33 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+(require :split-sequence)
+(use-package :split-sequence)
+
+(defvar *current-path* (load-time-value
+			(or #.*compile-file-pathname* 
+			    *load-pathname*)))
+(defvar *dirpath* (directory-namestring *current-path*))
+(defun lib-path (name)
+  (destructuring-bind (name type) (split-sequence #\. name)
+    (make-pathname :defaults *dirpath* :name name :type type)))
+
+(defun make-default-stage (name w h)
+  (with-open-file (s (lib-path name) :direction :output)
+    (dotimes (i h)
+      (if (= i (1- h))
+	  (dotimes (j w)
+	    (princ "1 " s))
+	  (dotimes (j w)
+	    (princ "0 " s)))
+      (fresh-line s))))
+
+(defun main (&rest argv)
+  (declare (ignorable argv))
+  (make-default-stage (first argv) 
+		      (parse-integer
+		       (second argv))
+		      (parse-integer
+		       (third argv))))

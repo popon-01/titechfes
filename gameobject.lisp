@@ -1,61 +1,90 @@
 (in-package titechfes)
 ;------------------gameobject------------------
-(defgeneric update-all (objects))
-(defgeneric draw-all (objects))
-(defgeneric update-object (object))
-(defgeneric draw-object (object))
+(defgeneric update-object (object game))
+(defgeneric draw-object (object game))
 
 
-(defmacro init-object (object &rest group)
-  `(progn
-     (with-slots (width height image) ,object
-       (setf width (sdl:width image))
-       (setf height (sdl:height image)))
-     ,@(loop for g in group collect `(push ,object (container ,g)))))
+(defun update-all (game)
+  (dolist (obj (all-object game))
+    (update-object obj game))
+  (setf (all-object game) (remove-if-not #'alive (all-object game))
+	(mapchips game) (remove-if-not #'alive (mapchips game))
+	(enemies game) (remove-if-not #'alive (enemies game))
+	(bullets game) (remove-if-not #'alive (bullets game))))
 
-(defclass obj-group ()
-  ((container :initarg :container :initform nil :accessor container)))
+(defun draw-all (game)
+  (dolist (obj (all-object game))
+    (draw-object obj game)))
 
-(defmethod update-all ((group obj-group))
-  (dolist (obj (container group))
-    (update-object obj)))
+;;gameobject
+(define-class gameobject ()
+  (x 0 get-x) (vx 0)
+  (y 0 get-y) (vy 0)
+  width
+  height
+  (alive t)
+  image
+  (atk 10)
+  (knock-back-atk 20))
 
-(defmethod draw-all((group obj-group))
-  (dolist (obj (container group))
-    (draw-object obj)))
+(defmethod initialize-instance :after ((obj gameobject) &key)
+  (with-slots (image width height) obj
+    (setf width (sdl:width image)
+	  height (sdl:height image))))
 
-;;;wall
-(defclass map-group ()
-  ((container :initarg :container :initform nil :accessor container)))
-
-(define-class wall ()
-  (x 0)
-  (y 0)
-  (width 32)
-  (height 32)
-  (image (error "image not initialized")))
-
-(defmethod update-object ((w wall)))
-
-(defmethod draw-object ((w wall))
-  (with-slots (x y width height image) w
+(defmethod draw-object ((obj gameobject) game)
+  (with-slots (x y width height image) obj
     (sdl:draw-surface-at-* image
-			   (- x (/ width 2))
-			   (- y (/ height 2)))))
+			   (- (round (x-in-camera x game)) 
+			      (/ width 2))
+			   (- (round (y-in-camera y game)) 
+			      (/ height 2)))))
 
+(defmethod update-object ((obj gameobject) game)
+  (incf (get-x obj) (vx obj))
+  (incf (get-y obj) (vy obj))
+  (when (out-of-map-p obj game)
+    (kill obj)))
 
+(defmethod kill ((obj gameobject)) (setf (alive obj) nil))
 
+(defmethod out-of-map-p ((obj gameobject) game)
+  (let ((border 40))
+    (not (and (< (- border) (get-x obj) 
+		 (+ (first (map-size game)) border))
+	      (< (- border) (get-y obj)
+		 (+ (second (map-size game)) border))))))
 
 ;------------------collide------------------
 (defgeneric rect-collide (a b))
 
 (defmethod rect-collide (a b)
-  (and (< (- (x a) (/ (width a) 2))
-	      (+ (x b) (/ (width b) 2)))
-       (< (- (x b) (/ (width b) 2))
-	  (+ (x a) (/ (width a) 2)))
-       (< (- (y a) (/ (height a) 2))
-	      (+ (y b) (/ (height b) 2)))
-       (< (- (y b) (/ (height b) 2))
-	  (+ (y a) (/ (height a) 2)))))
+  (and (< (- (get-x a) (/ (width a) 2))
+	  (+ (get-x b) (/ (width b) 2)))
+       (< (- (get-x b) (/ (width b) 2))
+	  (+ (get-x a) (/ (width a) 2)))
+       (< (- (get-y a) (/ (height a) 2))
+	  (+ (get-y b) (/ (height b) 2)))
+       (< (- (get-y b) (/ (height b) 2))
+	  (+ (get-y a) (/ (height a) 2)))))
 
+(defun get-left (obj)
+  (- (get-x obj) (truncate (width obj) 2)))
+(defun get-top (obj)
+  (- (get-y obj) (truncate (height obj) 2)))
+
+(defmethod rect-collide= (a b)
+  (and (<= (- (get-x a) (/ (width a) 2))
+	   (+ (get-x b) (/ (width b) 2)))
+       (<= (- (get-x b) (/ (width b) 2))
+	   (+ (get-x a) (/ (width a) 2)))
+       (<= (- (get-y a) (/ (height a) 2))
+	   (+ (get-y b) (/ (height b) 2)))
+       (<= (- (get-y b) (/ (height b) 2))
+	   (+ (get-y a) (/ (height a) 2)))))
+
+(defun rect-collision-judge (rec1 rec2)
+  (and (< (sdl:x rec1) (sdl:x2 rec2))
+       (< (sdl:x rec2) (sdl:x2 rec1))
+       (< (sdl:y rec1) (sdl:y2 rec2))
+       (< (sdl:y rec2) (sdl:y2 rec1))))

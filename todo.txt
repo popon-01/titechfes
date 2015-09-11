@@ -1,0 +1,18 @@
+D M 着地硬直
+D M ジャンプクールタイム削除
+M 既存の敵のノックバックの設定
+
+敵の製作
+W aomura
+D kuribo
+M kuribo-turret
+M 雑魚を産む敵
+W 硬いでかい
+D fly2
+D tullet 固定
+D W tullet  自機狙い
+M fly-turret (fly-and-stop)
+
+H somebombの作成
+ステージの作成
+(素材)
