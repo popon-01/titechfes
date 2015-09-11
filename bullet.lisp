@@ -33,10 +33,10 @@
 (define-class knife (bullet)
   (image (get-image :knife))
   (vx 7)
-  (life 20)
+  (life 30)
   (atk 20)
-  (cool-time 10)
-  (knock-back-atk 5))
+  (cool-time 15)
+  (knock-back-atk 0.3))
 
 (defmethod update-object ((bul knife) game)
   (call-next-method)

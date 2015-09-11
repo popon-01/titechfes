@@ -34,7 +34,7 @@
 (defmethod knock-back ((obj gameobject) (e land-enemy))
   (setf (vx e) (pmif (plusp (- (get-x e) (get-x obj)))
 		     (knock-back-atk obj))
-	(vy e) -10))
+	(vy e) (- (* 3 (knock-back-atk obj)))))
 
 (defmethod knock-back ((obj gameobject) (e air-enemy))
   (let ((knock-dir (univec (- (vx obj) (vx e))
@@ -60,10 +60,12 @@
 	(if (plusp (vx char)) 
 	    (image-r char)
 	    (image-l char))))
+
 (defun search-player (enemy game)
   (setf (find-player enemy)
-	(< (distance enemy (player game))
-	   (search-range enemy))))
+	(or (find-player enemy)
+	    (< (distance enemy (player game))
+	       (search-range enemy)))))
 
 ;; kuribo
 
@@ -74,29 +76,42 @@
   (vx 1.4)
   (p-turn 0.4)
   (turn-routine (make-timer 40))
+  (knock-back-timer (make-timer 20))
   (image (get-image :enemy-l))
   (image-r (get-image :enemy-r))
   (image-l (get-image :enemy-l))
   (find-player nil)
+  (state #'kuribo-walk)
   (search-range 100))
 
 (defmethod update-object ((e kuribo) game)
   (call-next-method)
   (image-turn e)
   (search-player e game)
-  (when (not (muteki e))
-    (if (find-player e)
-	(setf (vx e) 
-	      (pmif (<= (get-x e) (get-x (player game)))
-		    (xspeed e)))
-	(when (and (funcall (turn-routine e))
-		   (< (random 1.0) (p-turn e)))
-	  (setf (vx e) (- (vx e)))))))
+  (funcall (state e) e game))
+
+(defstate kuribo-walk (e game)
+  (when (and (funcall (turn-routine e))
+	     (< (random 1.0) (p-turn e)))
+    (setf (vx e) (pmif (minusp (vx e))
+		       (xspeed e))))
+  (when (find-player e)
+    (setf (state e) #'kuribo-walk-to-player)))
+
+(defstate kuribo-walk-to-player (e game)
+  (setf (vx e) 
+	(pmif (<= (get-x e) (get-x (player game)))
+	      (xspeed e))))
+
+(defstate kuribo-knock-back (e game)
+  (when (funcall (knock-back-timer e))
+    (setf (state e) #'kuribo-walk-to-player)))
 
 
-(defmethod knock-back ((char gamecharacter) (e kuribo))
+(defmethod knock-back ((obj gameobject) (e kuribo))
   (call-next-method)
-  (setf (find-player e) t))
+  (setf (find-player e) t
+	(state e) #'kuribo-knock-back))
 
 ;;kuribo-tullet
 
@@ -328,23 +343,76 @@
 
 ;; big
 (define-class big (land-enemy)
-  (hp 200)
+  (hp 500)
   (atk 30)
-  (lspeed 1.2)
-  (hspeed 4.0)
-  (dash-time 60)
-  (stop-time 20)
-  (dash-recovery 180)
+  (lspeed 1.8)
+  (hspeed 5.0)
+  (vx -1.8)
+  (dash-timer (make-timer 60))
+  (stop-timer (make-timer 20))
+  (turn-timer (make-timer 60))
+  (p-turn 0.4)
+  (dash-recovery (charge-timer 60))
   (find-player nil)
   (search-range 100)
   (image (get-image :big-l))
   (image-l (get-image :big-l))
-  (image-r (get-image :big)))
+  (image-r (get-image :big))
+  (armer nil)
+  (knock-back-timer (make-timer 15))
+  (state #'big-walk))
 
-;; next
+(defmethod knock-back ((obj gameobject) (b big))
+  (setf (find-player b) t)
+  (unless (armer b)
+    (setf (state b) #'big-knock-back)
+    (setf (vx b) (pmif (plusp (- (get-x b) (get-x obj)))
+		       (* 0.5 (knock-back-atk obj)))
+	  (vy b) -5)))
+
 (defmethod update-object ((b big) game)
   (call-next-method)
   (search-player b game)
   (image-turn b)
-  (if (find-player b) 1 2
-      ))
+  (funcall (state b) b game))
+
+(defstate big-walk (b game)
+  (when (and (funcall (turn-timer b))
+		      (< (random 1.0) (p-turn b)))
+	     (setf (vx b)
+		   (pmif (minusp (vx b)) (lspeed b))))
+  (when (find-player b)
+    (setf (state b) #'big-walk-to-player)))
+
+(defstate big-walk-to-player (b game)
+  (funcall (dash-recovery b) :charge)
+  (setf (vx b)
+	(pmif (< (get-x b) (get-x (player game)))
+	      (lspeed b)))
+  (when (funcall (dash-recovery b) :shot)
+    (setf (state b) #'big-stop)))
+
+(defstate big-stop (b game)
+  (setf (armer b) t (vx b) 0)
+  (when (funcall (stop-timer b))
+    (setf (state b) #'big-dash
+	  (vx b) (pmif (< (get-x b) 
+			  (get-x (player game)))
+		       (hspeed b)))))
+
+(defstate big-dash (b game)
+  (setf (atk b) 60)
+  (when (funcall (dash-timer b))
+    (setf (state b) (if (find-player b)
+			#'big-walk-to-player
+			#'big-walk)
+	  (armer b) nil
+	  (atk b) 30)))
+
+(defstate big-knock-back (b game)
+  (funcall (dash-recovery b) :charge)
+  (when (funcall (knock-back-timer b))
+    (setf (state b) (if (find-player b)
+			#'big-walk-to-player
+			#'big-walk)
+	  (armer b) nil)))
