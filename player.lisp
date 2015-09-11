@@ -71,7 +71,7 @@
 		 ax (if dir-right dash-accel (- dash-accel)))
 	   (decf dash-count))))))
 
-(defun player-accelerarion (ply)
+(defun player-acceleration (ply)
   (with-slots  (dx dy vx vy ax ay rvx rvy while-dash) ply
     (incf vy ay)
     (setf ay *gravity*)
@@ -111,7 +111,7 @@
     (setf vx  0
 	  image (if dir-right image-r image-l))
     (player-keyevents ply game)
-    (player-accelerarion ply)
+    (player-acceleration ply)
     (player-flag-update ply)))
 
 
