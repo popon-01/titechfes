@@ -25,20 +25,32 @@
   (alive t)
   image
   (atk 10)
+  (ani-time 0)
+  cell-num
+  (ani-frame 1)
   (knock-back-atk 20))
 
 (defmethod initialize-instance :after ((obj gameobject) &key)
-  (with-slots (image width height) obj
-    (setf width (sdl:width image)
-	  height (sdl:height image))))
+  (with-slots (image width height cell-num) obj
+    (setf cell-num (length (sdl:cells image)))
+    (if (> cell-num 1)
+	(setf width (sdl:width (elt (sdl:cells image) 0))
+	      height (sdl:height (elt (sdl:cells image) 0)))
+	(setf width (sdl:width image)
+	      height (sdl:height image)))))
 
 (defmethod draw-object ((obj gameobject) game)
-  (with-slots (x y width height image) obj
-    (sdl:draw-surface-at-* image
-			   (- (round (x-in-camera x game)) 
-			      (/ width 2))
-			   (- (round (y-in-camera y game)) 
-			      (/ height 2)))))
+  (with-slots (x y width height image
+		 ani-time cell-num ani-frame) obj
+    (let ((nowcell (mod (truncate ani-time ani-frame) cell-num))) 
+      (sdl:draw-surface-at-* image
+			     (- (round (x-in-camera x game)) 
+				(/ width 2))
+			     (- (round (y-in-camera y game)) 
+				(/ height 2))
+			     :cell nowcell)
+      (setf (ani-time obj) 
+	    (mod (1+ ani-time) (* cell-num ani-frame))))))
 
 (defmethod update-object ((obj gameobject) game)
   (incf (get-x obj) (vx obj))

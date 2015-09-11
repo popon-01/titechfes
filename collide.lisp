@@ -118,16 +118,18 @@
 (defcollide (bul penetrate) (chip wall))
 
 (defcollide (bul bomb) (chip wall)
-  (when (and (rect-collide bul chip) 
-	     (equal (state bul) "bomb"))
-      (make-explosion bul)))
+  (when (rect-collide chip bul)
+    (push-game-object (make-instance 'bomb-exp
+				     :x (get-x bul) :y (get-y bul))
+		      game)
+    (kill bul)))
 
 (defcollide (enem enemy) (bul bomb)
   (when (rect-collide enem bul)
-    (cond ((equal (state bul) "bomb")
-	   (make-explosion bul))
-	  ((equal (state bul) "explosion")
-	   (decf (hp enem) (atk bul))))))
+    (push-game-object (make-instance 'bomb-exp
+				     :x (get-x bul) :y (get-y bul))
+		      game)
+    (kill bul)))
 
 (defcollide (bul axe) (chip wall)
   (call-next-method)

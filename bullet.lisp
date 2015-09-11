@@ -33,7 +33,7 @@
 (define-class knife (bullet)
   (image (get-image :knife))
   (vx 7)
-  (life 20)
+  (life 40)
   (atk 20)
   (cool-time 10)
   (knock-back-atk 5))
@@ -49,6 +49,7 @@
 ;;;axe
 (define-class axe (bullet)
   (image (get-image :axe))
+  (ani-frame 3)
   (atk 50)
   (cool-time 15)
   (vx 1)
@@ -101,7 +102,7 @@
 ;;javelin
 
 (define-class javelin (bullet)
-  (image (get-image :knife))
+  (image (get-image :javelin))
   (atk 50)
   (life 30)
   (cool-time 50)
@@ -123,37 +124,31 @@
   (atk 0)
   (cool-time 15)
   (vx 3)
-  (vy -10)
-  (state "bomb")
-  (life 10))
+  (vy -10))
 
 (defmethod update-object ((bul bomb) game)
   (call-next-method)
-  (cond ((equal (state bul) "bomb")
-	 (incf (vy bul) *gravity*)
-	 (when (> (vy bul) 10) (setf (vy bul) 10)))
-	((equal (state bul) "explosion")
-	 (decf (life bul))
-	 (when (zerop (life bul)) (kill bul)))))
-
+  (incf (vy bul) *gravity*)
+  (when (> (vy bul) 10) (setf (vy bul) 10)))
 
 (defun shot-bomb (ply game)
   (shoot bomb ply game))
 
-(defun make-explosion (bul)
-  (setf (image bul) (get-image :explosion))
-  (setf (state bul) "explosion"
-	(width bul) (sdl:width (image bul))
-	(height bul) (sdl:height (image bul))
-	(vx bul) 0
-	(vy bul) 0
-	(atk bul) 50))
+(define-class bomb-exp (bullet)
+  (image (get-image :explosion))
+  (atk 50)
+  (life 10))
 
+(defmethod update-object ((bul bomb-exp) game)
+  (call-next-method)
+  (decf (life bul))
+  (when (zerop (life bul)) (kill bul)))
 
 ;;boomerang
 
 (define-class boomerang (bullet)
-  (image (get-image :knife))
+  (image (get-image :boomerang))
+  (ani-frame 3)
   (atk 20)
   (life 30)
   (cool-time 10)

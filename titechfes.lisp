@@ -4,8 +4,8 @@
 
 (defun gameimage-load ()
   (load-images '(:wall "wall_g.png")
-	       '(:knife "knife.png")
-	       '(:axe "axe.png")
+	       '(:knife "knife2.png")
+	       '(:javelin "javelin.png")
 	       '(:explosion "explosion.png")
 	       '(:player-l "me2.png")
 	       '(:player-r "me.png")
@@ -16,7 +16,11 @@
 	       '(:ebul "ebul.png")
 	       '(:big "big.png")
 	       '(:big-l "big-l.png")
-	       '(:title "title_touka.png")))
+	       '(:title "title_touka.png"))
+  (load-animations '(:boomerang "boomerang_ani.png"
+		     24 24 96 24)
+		   '(:axe "axe_ani.png"
+		     24 24 96 24)))
 
 ;------------------main------------------
 (defun run ()
