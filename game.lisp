@@ -6,6 +6,7 @@
   (camera '(0 0))
   (player nil)
   (all-object nil)
+  (update-object-list nil)
   (mapchips nil)
   (enemies nil)
   (enemy-bullets nil)
@@ -32,3 +33,9 @@
 (defun change-state (sym game)
   (setf (state game) sym)
   (update-state game))
+
+(defun near-player-p (obj game)
+  (and (< (abs (- (get-x (player game))
+		  (get-x obj))) 640)
+       (< (abs (- (get-y (player game))
+		  (get-y obj))) 480)))

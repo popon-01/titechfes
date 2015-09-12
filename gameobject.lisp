@@ -5,15 +5,19 @@
 
 
 (defun update-all (game)
-  (dolist (obj (all-object game))
+  (dolist (obj (update-object-list game))
     (update-object obj game))
   (setf (all-object game) (remove-if-not #'alive (all-object game))
-	(mapchips game) (remove-if-not #'alive (mapchips game))
-	(enemies game) (remove-if-not #'alive (enemies game))
-	(bullets game) (remove-if-not #'alive (bullets game))))
+	(update-object-list game) 
+	(remove-if-not (lambda (obj) (near-player-p obj game))
+		       (all-object game))
+;	(mapchips game) (remove-if-not #'alive (mapchips game))
+;	(enemies game) (remove-if-not #'alive (enemies game))
+;	(bullets game) (remove-if-not #'alive (bullets game)))
+	))
 
 (defun draw-all (game)
-  (dolist (obj (all-object game))
+  (dolist (obj (update-object-list game))
     (draw-object obj game)))
 
 ;;gameobject
@@ -45,9 +49,9 @@
     (let ((nowcell (mod (truncate ani-time ani-frame) cell-num))) 
       (sdl:draw-surface-at-* image
 			     (- (round (x-in-camera x game)) 
-				(/ width 2))
+				(truncate width 2))
 			     (- (round (y-in-camera y game)) 
-				(/ height 2))
+				(truncate height 2))
 			     :cell nowcell)
       (setf (ani-time obj) 
 	    (mod (1+ ani-time) (* cell-num ani-frame))))))
@@ -56,9 +60,9 @@
   (incf (get-x obj) (vx obj))
   (incf (get-y obj) (vy obj))
   (when (out-of-map-p obj game)
-    (kill obj)))
+    (kill obj game)))
 
-(defmethod kill ((obj gameobject)) (setf (alive obj) nil))
+(defmethod kill ((obj gameobject) game) (setf (alive obj) nil))
 
 (defmethod out-of-map-p ((obj gameobject) game)
   (let ((border 40))

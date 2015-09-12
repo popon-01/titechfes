@@ -7,7 +7,7 @@
   (atk 20)
   (penetrate nil)
   (cool-time 0)
-  (knock-back-atk 5))
+  (knock-back-atk 3))
 
 (defmethod update-object ((bul bullet) game)
   (call-next-method)
@@ -47,7 +47,7 @@
 (defmethod update-object ((bul knife) game)
   (call-next-method)
   (decf (life bul))
-  (when (zerop (life bul)) (kill bul)))
+  (when (zerop (life bul)) (kill bul game)))
 
 (defun shot-knife (ply game)
   (shoot knife ply game))
@@ -85,7 +85,7 @@
 (defmethod update-object ((bul two-way) game)
   (call-next-method)
   (decf (life bul))
-  (when (zerop (life bul)) (kill bul)))
+  (when (zerop (life bul)) (kill bul game)))
 
 (defun shot-two-way (ply game)
   (shoot two-way ply game :vy -1)
@@ -105,7 +105,7 @@
 (defmethod update-object ((bul penetrate) game)
   (call-next-method)
   (decf (life bul))
-  (when (zerop (life bul)) (kill bul)))
+  (when (zerop (life bul)) (kill bul game)))
 
 (defun shot-penetrate (ply game)
   (shoot penetrate ply game))
@@ -117,16 +117,17 @@
   (image (get-image :javelin-l))
   (image-l (get-image :javelin-l))
   (image-r (get-image :javelin-r))
-  (atk 50)
+  (atk 40)
   (life 30)
-  (cool-time 50)
+  (cool-time 60)
+  (knock-back-atk 4)
   (vx 14)
   (penetrate t))
 
 (defmethod update-object ((bul javelin) game)
   (call-next-method)
   (decf (life bul))
-  (when (zerop (life bul)) (kill bul)))
+  (when (zerop (life bul)) (kill bul game)))
 
 (defun shot-javelin (ply game)
   (shoot javelin ply game))
@@ -138,7 +139,7 @@
   (image-l (get-image :bomb-l))
   (image-r (get-image :bomb-r))
   (atk 0)
-  (cool-time 15)
+  (cool-time 90)
   (vx 3)
   (vy -10))
 
@@ -155,13 +156,14 @@
   (image-l (get-image :explosion))
   (image-r (get-image :explosion))
   (atk 50)
+  (knock-back-atk 6)
   (life 30)
   (penetrate t))
 
 (defmethod update-object ((bul bomb-exp) game)
   (call-next-method)
   (decf (life bul))
-  (when (zerop (life bul)) (kill bul)))
+  (when (zerop (life bul)) (kill bul game)))
 
 ;;boomerang
 
@@ -170,14 +172,15 @@
   (image-l (get-image :boomerang-l))
   (image-r (get-image :boomerang-r))
   (ani-frame 3)
-  (atk 20)
+  (atk 5)
   (life 30)
   (cool-time 0)
   (vx 15)
   (penetrate t)
+  (knock-back-atk 2)
   (back-velocity 20)
   (state :go)
-  (stay-count 30))
+  (stay-count 120))
 
 (defmethod update-object ((bul boomerang) game)
   (call-next-method)

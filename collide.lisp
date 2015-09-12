@@ -1,6 +1,11 @@
 (in-package titechfes)
 
+(declaim (optimize (debug 0) (safety 0) (space 0) (speed 3)))
+
 (defun try-move (obj1 obj2 &key (dx1 0) (dy1 0) (dx2 0) (dy2 0))
+  (declare (type gameobject obj1 obj2)
+	   (type number dx1 dy1 dx2 dy2))
+  (the symbol
   (not (and (< (- (+ (get-x obj1) dx1) (/ (width obj1) 2))
 	       (+ (+ (get-x obj2) dx2) (/ (width obj2) 2)))
 	    (< (- (+ (get-x obj2) dx2) (/ (width obj2) 2))
@@ -8,7 +13,7 @@
 	    (< (- (+ (get-y obj1) dy1) (/ (height obj1) 2))
 	       (+ (+ (get-y obj2) dy2) (/ (height obj2) 2)))
 	    (< (- (+ (get-y obj2) dy2) (/ (height obj2) 2))
-	       (+ (+ (get-y obj1) dy1) (/ (height obj1) 2))))))
+	       (+ (+ (get-y obj1) dy1) (/ (height obj1) 2)))))))
 
 (defun try-move= (obj1 obj2 &key (dx1 0) (dy1 0) (dx2 0) (dy2 0))
   (not (and (<= (- (+ (get-x obj1) dx1) (/ (width obj1) 2))
@@ -51,7 +56,6 @@
 (defcollide (obj-a gameobject) (obj-b gameobject))
 
 ;;player-behavior
-
 (defcollide (chr gamecharacter) (chip wall)
   (with-slots (dx dy) chr
     (when (not (try-move chr chip 
@@ -77,11 +81,11 @@
 (defcollide (ply player) (ebul enemy-bullet)
   (when (rect-collide ply ebul)
     (attack ebul ply)
-    (kill ebul)))
+    (kill ebul game)))
 
 (defcollide (e enemy) (ebul enemy-bullet)
   (when (rect-collide e ebul)
-    (kill ebul)))
+    (kill ebul game)))
 
 (defcollide (wall damage-wall) (player player)
   (call-next-method)
@@ -111,7 +115,7 @@
 
 ;;enemy-bullet-behavior
 (defcollide (ebul enemy-bullet) (chip wall)
-  (when (rect-collide ebul chip) (kill ebul)))
+  (when (rect-collide ebul chip) (kill ebul game)))
 
 ;;bullet-behavior
 (defcollide (bul bullet) (chip wall)
@@ -130,14 +134,14 @@
     (push-game-object (make-instance 'bomb-exp
 				     :x (get-x bul) :y (get-y bul))
 		      game)
-    (kill bul)))
+    (kill bul game)))
 
 (defcollide (enem enemy) (bul bomb)
   (when (rect-collide enem bul)
     (push-game-object (make-instance 'bomb-exp
 				     :x (get-x bul) :y (get-y bul))
 		      game)
-    (kill bul)))
+    (kill bul game)))
 
 (defcollide (bul axe) (chip wall)
   (call-next-method)
@@ -158,10 +162,10 @@
 (defcollide (bul boomerang) (ply player)
   (when (and (rect-collide bul ply)
 	     (equal (state bul) :back))
-    (kill bul)
+    (kill bul game)
     (return-boomerang)))
 
 (defcollide (item item) (p player)
   (when (rect-collide item p)
-    (kill item)
-    (item-effect item p game)))
+    (item-effect item p game)
+    (kill item game)))

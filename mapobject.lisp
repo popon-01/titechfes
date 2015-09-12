@@ -65,7 +65,14 @@
 
 (defmethod update-object ((wall break-wall) game)
   (when (not (plusp (hp wall)))
-    (kill wall)))
+    (kill wall game)))
 
 (define-class easy-break-wall (break-wall)
   (hp 30))
+
+
+
+
+
+
+

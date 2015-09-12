@@ -8,14 +8,38 @@
   (atk 0)
   (dir-right t)
   (muteki nil)
-  (muteki-count 0))
+  (muteki-count 0)
+  (item-table  '(score-item score-item score-item 
+		 weapon-item recovery-item)))
+
+(defmethod kill ((enemy enemy) game)
+  (call-next-method)
+  (item-drop enemy game))
+
+(defmethod item-drop ((enemy enemy) game)
+  (let ((item (random-elt (item-table enemy))))
+    (push-game-object
+     (if (eq 'weapon-item item)
+	 (make-instance 
+	  item 
+	  :x (get-x enemy) 
+	  :y (get-y enemy)
+	  :weapon (random-elt
+		   '(knife axe javelin bomb boomerang)))
+	 (make-instance 
+	  item 
+	  :x (get-x enemy) 
+	  :y (get-y enemy))) 
+     game)))
 
 (define-class land-enemy (enemy)
-  (in-air t))
+  (in-air t)
+  (hp 120))
 
 (define-class tullet-enemy (land-enemy))
 
-(define-class air-enemy (enemy))
+(define-class air-enemy (enemy)
+  (hp 60))
 
 (defmethod update-object ((enem land-enemy) game)
   (call-next-method)
@@ -53,7 +77,7 @@
 (define-class enemy-bullet (bullet)
   (vx 0)
   (vy 0)
-  (atk 0))
+  (atk 20))
 
 (defmacro change-enemy-state (enem states &body body)
   `(progn 
@@ -72,7 +96,7 @@
 ;; kuribo
 
 (define-class kuribo (land-enemy)
-  (hp 30)
+  (hp 70)
   (atk 10)
   (xspeed 1.4)
   (vx 1.4)
@@ -84,7 +108,7 @@
   (image-l (get-image :enemy-l))
   (find-player nil)
   (state #'kuribo-walk)
-  (search-range 100))
+  (search-range 200))
 
 (defmethod update-object ((e kuribo) game)
   (call-next-method)
@@ -93,6 +117,7 @@
   (funcall (state e) e game))
 
 (defstate kuribo-walk (e game)
+  (declare (ignore game))
   (when (and (funcall (turn-routine e))
 	     (< (random 1.0) (p-turn e)))
     (setf (vx e) (pmif (minusp (vx e))
@@ -106,6 +131,7 @@
 	      (xspeed e))))
 
 (defstate kuribo-knock-back (e game)
+  (declare (ignore game))
   (when (funcall (knock-back-timer e))
     (setf (state e) #'kuribo-walk-to-player)))
 
@@ -126,7 +152,7 @@
   (image (get-image :ebul))
   (image-l (get-image :ebul))
   (image-r (get-image :ebul))
-  (atk 20))
+  (atk 40))
 
 (defmethod update-object ((e kuribo-tullet) game)
   (call-next-method)
@@ -180,26 +206,29 @@
 
 ;;flying2
 (define-class flying2 (air-enemy)
+  (hp 100)
   (image (get-image :enemy2-l))
   (image-l (get-image :enemy2-l))
   (image-r (get-image :enemy2-r))
   (y-theta 0)
+  (find-player nil)
+  (search-range 200)
   (updown-omega 6)
   (atk 20))
 
 (defmethod update-object ((enem flying2) game)
   (call-next-method)
-  (incf (y-theta enem) (updown-omega enem))
-  (setf (y-theta enem) (mod (y-theta enem) 360))
-  (incf (vx enem) (if (< (get-x enem) (get-x (player game))) 0.2 -0.2))
-  (when (not (muteki enem))
-    (setf (vy enem) (+ (* pi (cos (rad (y-theta enem))))
-		       (* 0.005  (- (get-y (player game))
-				    (get-y enem)
-				    100)))
-	  (vx enem) (clamp (vx enem) -5 5))))
-
-
+  (search-player enem game)
+  (when (find-player enem)
+    (incf (y-theta enem) (updown-omega enem))
+    (setf (y-theta enem) (mod (y-theta enem) 360))
+    (incf (vx enem) (if (< (get-x enem) (get-x (player game))) 0.2 -0.2))
+    (when (not (muteki enem))
+      (setf (vy enem) (+ (* pi (cos (rad (y-theta enem))))
+			 (* 0.005  (- (get-y (player game))
+				      (get-y enem)
+				      60)))
+	    (vx enem) (clamp (vx enem) -5 5)))))
 
 ;;fly-and-stop
 (define-class fly-and-stop (air-enemy)
@@ -212,6 +241,8 @@
   (shot-routine 40)
   (state :stop)
   (act-routine 0)
+  (search-range 200)
+  (find-player nil)
   (fly-time 60)
   (stop-time 60)
   (atk 20))
@@ -240,7 +271,7 @@
 	  (dir-univec (get-x enem)
 		      (get-y enem)
 		      (get-x (player game))
-		      (get-y (player game))))
+		      (- (get-y (player game)) 40)))
 	 (new-vx (* (velocity enem) (first to-player-dir)))
 	 (new-vy (* (velocity enem) (second to-player-dir))))
     (change-enemy-state enem (:fly :stop)
@@ -251,17 +282,19 @@
 
 (defmethod update-object ((enem fly-and-stop) game)
   (call-next-method)
-  (when (and (equal (state enem) :stop)
-	     (zerop (mod (+ (act-routine enem) 30)
-			 (shot-routine enem))))
-    (shot-to-player enem 'fas-bullet game))
+  (search-player enem game)
+  (when (find-player enem)
+    (when (and (equal (state enem) :stop)
+	       (zerop (mod (+ (act-routine enem) 30)
+			   (shot-routine enem))))
+      (shot-to-player enem 'fas-bullet game))
   (when (not (muteki enem))
     (if (plusp (act-routine enem))
 	(progn
 	  (decf (act-routine enem))
 	  (setf (vx enem) (vec-x enem)
 		(vy enem) (vec-y enem)))
-	(change-fas-state enem game))))
+	(change-fas-state enem game)))))
 
 ;;tullet
 
@@ -275,9 +308,11 @@
 (define-class tullet (tullet-enemy)
   (image (get-image :enemy2-l))
   (atk 20)
-  (bullet-speed-x -3)
+  (bullet-speed-x -4)
   (bullet-speed-y 0)
-  (shot-routine 100))
+  (shot-routine 60)
+  (item-table  '(score-item score-item score-item 
+		 weapon-item recovery-item)))
 
 (defmethod update-object ((enem tullet) game)
   (call-next-method)
@@ -303,25 +338,23 @@
   (image (get-image :enemy-l))
   (hp 400)
   (atk 20)
-  (summoned-list nil)
-  (max-summon 5)
-  (summon-routine 300)
-  (summon-time 300))
+  (summon-timer (charge-timer 180))
+  (summon-list nil)
+  (summon-limit 5))
 
 (defmethod update-object ((e demon-gate) game)
   (call-next-method)
-  (setf (summoned-list e)
-	(remove-if-not #'alive (summoned-list e)))
-  (if (plusp (summon-routine e))
-      (decf (summon-routine e))
-      (progn
-	(when (< (length (summoned-list e)) (max-summon e))
-	  (let ((minion (make-instance 'kuribo
-				       :x (get-x e) :y(get-y e)
-				       :vx -1.4 :vy -10)))
-	    (push-game-object minion game)
-	    (push minion (summoned-list e))))
-	(setf (summon-routine e) (summon-time e)))))
+  (with-slots (summon-timer summon-list summon-limit) e
+    (setf summon-list (remove-if-not #'alive summon-list))
+    (when (and (< (length summon-list) summon-limit)
+	       (funcall summon-timer :charge)
+	       (funcall summon-timer :shot))
+      (let ((minion (make-instance 'kuribo
+				   :x (get-x e) :y(get-y e)
+				   :vx -1.4 :vy -10)))
+	(push-game-object minion game)
+	(push minion summon-list)))))
+
 
 ;; snipe-tullet
 (define-class snipe-tullet (tullet)
@@ -369,13 +402,14 @@
   (p-turn 0.4)
   (dash-recovery (charge-timer 60))
   (find-player nil)
-  (search-range 100)
+  (search-range 200)
   (image (get-image :big-l))
   (image-l (get-image :big-l))
   (image-r (get-image :big))
   (armer nil)
   (knock-back-timer (make-timer 15))
-  (state #'big-walk))
+  (state #'big-walk)
+  (item-table  '(dash-up jump-up)))
 
 (defmethod knock-back ((obj gameobject) (b big))
   (setf (find-player b) t)
@@ -392,6 +426,7 @@
   (funcall (state b) b game))
 
 (defstate big-walk (b game)
+  (declare (ignore game))
   (when (and (funcall (turn-timer b))
 		      (< (random 1.0) (p-turn b)))
 	     (setf (vx b)
@@ -416,6 +451,7 @@
 		       (hspeed b)))))
 
 (defstate big-dash (b game)
+  (declare (ignore game))
   (setf (atk b) 60)
   (when (funcall (dash-timer b))
     (setf (state b) (if (find-player b)
@@ -425,9 +461,13 @@
 	  (atk b) 30)))
 
 (defstate big-knock-back (b game)
+  (declare (ignore game))
   (funcall (dash-recovery b) :charge)
   (when (funcall (knock-back-timer b))
-    (setf (state b) (if (find-player b)
-			#'big-walk-to-player
-			#'big-walk)
+    (setf (state b) 
+	  (cond ((funcall (dash-recovery b) :shot)
+		 #'big-stop)
+		((find-player b)
+		 #'big-walk-to-player)
+		(t #'big-walk))
 	  (armer b) nil)))

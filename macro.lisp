@@ -30,12 +30,30 @@
      (defmethod ,method-name (,arg2 ,arg1)
        (,method-name ,(car arg1) ,(car arg2)))))
 
+(defparameter *collide-table* (make-hash-table))
+
+
+#|
 (defmacro defcollide (arg1 arg2 &body body)
   `(progn
      (defmethod collide (,arg1 ,arg2 game)
        ,@body)
      (defmethod collide (,arg2 ,arg1 game)
        ,@body)))
+|#
+
+(defmacro defcollide (arg1 arg2 &body body)
+  (let ((method-sym (symbolicate (second arg1) '- 
+				 (second arg2))))
+    `(progn 
+       (setf (gethash ',method-sym *collide-table*) 0)
+       (defmethod collide (,arg1 ,arg2 game)
+	 (incf (gethash ',method-sym *collide-table*))
+	 ,@body)
+       (defmethod collide (,arg2 ,arg1 game)
+	 (incf (gethash ',method-sym *collide-table*))
+	 ,@body))))
+
 
 (defun round-robin (fn lis)
   (mapl (lambda (xs) (mapcar (lambda (x) (funcall fn (car xs) x))

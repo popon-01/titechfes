@@ -37,7 +37,7 @@
 		  jump-cool
 		  jump-length jump-lengthtime
 		  while-dash
-		  dash-count dash-accel
+		  dash-count dash-accel max-dash
 		  dash-cool dash-cooltime
 		  shot-func shot-cool
 		  dir-right alive) ply
@@ -68,7 +68,10 @@
 	  ((and (key-down-p dash) (plusp dash-count) (zerop dash-cool))
 	   (setf while-dash t
 		 dash-cool dash-cooltime
-		 ax (if dir-right dash-accel (- dash-accel)))
+		 ax (pmif dir-right 
+			  (clamp (+ dash-accel
+				    (* 5 (- max-dash 2)))
+				 20 40)))
 	   (decf dash-count))))))
 
 (defun player-acceleration (ply)
