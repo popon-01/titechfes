@@ -70,7 +70,8 @@
   (let ((knock-dir (univec (- (vx obj) (vx e))
 			   (- (vy obj) (vy e)))))
     (setf (vx e) (* (knock-back-atk obj) (first knock-dir))
-	  (vy e) (* (knock-back-atk obj) (second knock-dir)))))
+	  (vy e) (* (knock-back-atk obj) (second knock-dir))
+	  (find-player e) t)))
 
 (defmethod knock-back ((obj gameobject) (e tullet-enemy)))
 
@@ -108,7 +109,7 @@
   (image-l (get-image :enemy-l))
   (find-player nil)
   (state #'kuribo-walk)
-  (search-range 200))
+  (search-range 150))
 
 (defmethod update-object ((e kuribo) game)
   (call-next-method)
@@ -152,7 +153,7 @@
   (image (get-image :ebul))
   (image-l (get-image :ebul))
   (image-r (get-image :ebul))
-  (atk 40))
+  (atk 30))
 
 (defmethod update-object ((e kuribo-tullet) game)
   (call-next-method)
@@ -206,7 +207,6 @@
 
 ;;flying2
 (define-class flying2 (air-enemy)
-  (hp 100)
   (image (get-image :enemy2-l))
   (image-l (get-image :enemy2-l))
   (image-r (get-image :enemy2-r))
@@ -227,7 +227,7 @@
       (setf (vy enem) (+ (* pi (cos (rad (y-theta enem))))
 			 (* 0.005  (- (get-y (player game))
 				      (get-y enem)
-				      60)))
+				      100)))
 	    (vx enem) (clamp (vx enem) -5 5)))))
 
 ;;fly-and-stop
@@ -271,7 +271,7 @@
 	  (dir-univec (get-x enem)
 		      (get-y enem)
 		      (get-x (player game))
-		      (- (get-y (player game)) 40)))
+		      (- (get-y (player game)) 100)))
 	 (new-vx (* (velocity enem) (first to-player-dir)))
 	 (new-vy (* (velocity enem) (second to-player-dir))))
     (change-enemy-state enem (:fly :stop)
@@ -336,9 +336,9 @@
 
 (define-class demon-gate (tullet-enemy)
   (image (get-image :demon-gate))
-  (hp 400)
+  (hp 250)
   (atk 20)
-  (summon-timer (charge-timer 180))
+  (summon-timer (charge-timer 300))
   (summon-list nil)
   (summon-limit 5))
 
@@ -452,7 +452,7 @@
 
 (defstate big-dash (b game)
   (declare (ignore game))
-  (setf (atk b) 60)
+  (setf (atk b) 50)
   (when (funcall (dash-timer b))
     (setf (state b) (if (find-player b)
 			#'big-walk-to-player

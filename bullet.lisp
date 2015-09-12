@@ -41,7 +41,7 @@
   (vx 7)
   (life 30)
   (atk 20)
-  (cool-time 15)
+  (cool-time 10)
   (knock-back-atk 0.8))
 
 (defmethod update-object ((bul knife) game)
@@ -155,7 +155,7 @@
   (image (get-image :explosion))
   (image-l (get-image :explosion))
   (image-r (get-image :explosion))
-  (atk 50)
+  (atk 70)
   (knock-back-atk 6)
   (life 30)
   (penetrate t))
