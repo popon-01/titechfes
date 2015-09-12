@@ -4,8 +4,10 @@
 
 (defun gameimage-load ()
   (load-images '(:wall "wall_g.png")
-	       '(:knife "knife2.png")
-	       '(:javelin "javelin.png")
+	       '(:knife-l "knife2-l.png")
+	       '(:knife-r "knife2-r.png")
+	       '(:javelin-l "javelin-l.png")
+	       '(:javelin-r "javelin-r.png")
 	       '(:explosion "explosion.png")
 	       '(:player-l "me2.png")
 	       '(:player-r "me.png")
@@ -17,9 +19,17 @@
 	       '(:big "big.png")
 	       '(:big-l "big-l.png")
 	       '(:title "title_touka.png"))
-  (load-animations '(:boomerang "boomerang_ani.png"
+  (load-animations '(:boomerang-l "boomerang-l_ani.png"
 		     24 24 96 24)
-		   '(:axe "axe_ani.png"
+		   '(:boomerang-r "boomerang-r_ani.png"
+		     24 24 96 24)
+		   '(:axe-l "axe-l_ani.png"
+		     24 24 96 24)
+		   '(:axe-r "axe-r_ani.png"
+		     24 24 96 24)
+		   '(:bomb-l "bomb-l_ani.png"
+		     24 24 96 24)
+		   '(:bomb-r "bomb-r_ani.png"
 		     24 24 96 24)))
 
 ;------------------main------------------

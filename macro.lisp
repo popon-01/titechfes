@@ -156,3 +156,8 @@
 	   (destructuring-bind ,lambda-list ,glis
 	     ,@body)))))
 
+(defun image-turn (obj)
+  (setf (image obj) 
+	(if (plusp (vx obj)) 
+	    (image-r obj)
+	    (image-l obj))))

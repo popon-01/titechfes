@@ -3,11 +3,15 @@
 (define-class bullet (gameobject)
   (vx 0)
   (vy 0)
+  image-l image-r
   (atk 20)
   (penetrate nil)
   (cool-time 0)
   (knock-back-atk 5))
 
+(defmethod update-object ((bul bullet) game)
+  (call-next-method)
+  (image-turn bul))
 
 ;---template---
 ;(define-class name (bullet))
@@ -31,7 +35,9 @@
 
 ;;;knife
 (define-class knife (bullet)
-  (image (get-image :knife))
+  (image (get-image :knife-l))
+  (image-l (get-image :knife-l))
+  (image-r (get-image :knife-r))
   (vx 7)
   (life 30)
   (atk 20)
@@ -48,7 +54,9 @@
 
 ;;;axe
 (define-class axe (bullet)
-  (image (get-image :axe))
+  (image (get-image :axe-l))
+  (image-l (get-image :axe-l))
+  (image-r (get-image :axe-r))
   (ani-frame 3)
   (atk 30)
   (cool-time 30)
@@ -66,7 +74,9 @@
 
 ;;2way
 (define-class two-way (bullet)
-  (image (get-image :knife))
+  (image (get-image :knife-l))
+  (image-l (get-image :knife-l))
+  (image-r (get-image :knife-r))
   (atk 20)
   (life 30)
   (cool-time 10)
@@ -84,7 +94,9 @@
 ;;penetrate
 
 (define-class penetrate (bullet)
-  (image (get-image :knife))
+  (image (get-image :knife-l))
+  (image-l (get-image :knife-l))
+  (image-r (get-image :knife-r))
   (atk 20)
   (life 30)
   (cool-time 10)
@@ -102,7 +114,9 @@
 ;;javelin
 
 (define-class javelin (bullet)
-  (image (get-image :javelin))
+  (image (get-image :javelin-l))
+  (image-l (get-image :javelin-l))
+  (image-r (get-image :javelin-r))
   (atk 50)
   (life 30)
   (cool-time 50)
@@ -120,7 +134,9 @@
 ;;bomb
 
 (define-class bomb (bullet)
-  (image (get-image :axe))
+  (image (get-image :bomb-l))
+  (image-l (get-image :bomb-l))
+  (image-r (get-image :bomb-r))
   (atk 0)
   (cool-time 15)
   (vx 3)
@@ -136,6 +152,8 @@
 
 (define-class bomb-exp (bullet)
   (image (get-image :explosion))
+  (image-l (get-image :explosion))
+  (image-r (get-image :explosion))
   (atk 50)
   (life 30)
   (penetrate t))
@@ -148,7 +166,9 @@
 ;;boomerang
 
 (define-class boomerang (bullet)
-  (image (get-image :boomerang))
+  (image (get-image :boomerang-l))
+  (image-l (get-image :boomerang-l))
+  (image-r (get-image :boomerang-r))
   (ani-frame 3)
   (atk 20)
   (life 30)

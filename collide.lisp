@@ -10,9 +10,19 @@
 	    (< (- (+ (get-y obj2) dy2) (/ (height obj2) 2))
 	       (+ (+ (get-y obj1) dy1) (/ (height obj1) 2))))))
 
+(defun try-move= (obj1 obj2 &key (dx1 0) (dy1 0) (dx2 0) (dy2 0))
+  (not (and (<= (- (+ (get-x obj1) dx1) (/ (width obj1) 2))
+		(+ (+ (get-x obj2) dx2) (/ (width obj2) 2)))
+	    (<= (- (+ (get-x obj2) dx2) (/ (width obj2) 2))
+		(+ (+ (get-x obj1) dx1) (/ (width obj1) 2)))
+	    (<= (- (+ (get-y obj1) dy1) (/ (height obj1) 2))
+		(+ (+ (get-y obj2) dy2) (/ (height obj2) 2)))
+	    (<= (- (+ (get-y obj2) dy2) (/ (height obj2) 2))
+		(+ (+ (get-y obj1) dy1) (/ (height obj1) 2))))))
+
 (defun adjust-dx (move-obj obj2)
   (setf (dx move-obj) 
-	(- (get-x obj2)
+	(- (+ (get-x obj2) (vx obj2))
 	   (pmif (plusp (- (get-x obj2) (get-x move-obj)))
 		 (+ (truncate (width obj2) 2)
 		    (truncate (width move-obj) 2)))
@@ -20,7 +30,7 @@
 
 (defun adjust-dy (move-obj obj2)
   (setf (dy move-obj) 
-	(- (get-y obj2)
+	(- (+ (get-y obj2) (vy obj2))
 	   (pmif (plusp (- (get-y obj2) (get-y move-obj)))
 		 (+ (truncate (height obj2) 2)
 		    (truncate (height move-obj) 2)))
@@ -44,7 +54,9 @@
 
 (defcollide (chr gamecharacter) (chip wall)
   (with-slots (dx dy) chr
-    (when (not (try-move chr chip :dx1 dx :dy1 dy))
+    (when (not (try-move chr chip 
+			 :dx1 dx :dy1 dy 
+			 :dx2 (vx chip) :dy2 (vy chip)))
       (let ((dir (dir-detect chr chip)))
 	(cond ((eq dir :y) (adjust-dy chr chip))
 	      ((eq dir :x) (adjust-dx chr chip)))))))
@@ -55,8 +67,8 @@
 	     (< (abs (- (get-x chip) (get-x chr)))
 		(ash (+ (width chip) (width chr)) -1))
 	     (< (get-y chr) (get-y chip)))
-    (incf (rvx chr) (vx chip))
-    (incf (rvy chr) (vy chip))))
+    (setf (rvx chr) (vx chip))
+    (setf (rvy chr) (vy chip))))
 
 (defcollide (ply player) (enem enemy)
   (when (rect-collide ply enem)

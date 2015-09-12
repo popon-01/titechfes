@@ -13,6 +13,8 @@
 (define-class land-enemy (enemy)
   (in-air t))
 
+(define-class tullet-enemy (land-enemy))
+
 (define-class air-enemy (enemy))
 
 (defmethod update-object ((enem land-enemy) game)
@@ -25,6 +27,9 @@
       (incf (vy enem) *gravity*) (setf (vy enem) 0.1))
   (when (> (vy enem) 10) (setf (vy enem) 10)))
 
+(defmethod update-object ((enem tullet-enemy) game)
+  (call-next-method)
+  (setf (vx enem) 0))
 
 (defmethod update-object  ((enem enemy) game)
   (call-next-method)
@@ -43,6 +48,8 @@
     (setf (vx e) (* (knock-back-atk obj) (first knock-dir))
 	  (vy e) (* (knock-back-atk obj) (second knock-dir)))))
 
+(defmethod knock-back ((obj gameobject) (e tullet-enemy)))
+
 (define-class enemy-bullet (bullet)
   (vx 0)
   (vy 0)
@@ -55,12 +62,6 @@
 	   (cond ,@(mapcar (lambda (state val) 
 			     (list `(equal (state ,enem) ,state) val))
 			   states (cdr b)))))))
-
-(defun image-turn (char)
-  (setf (image char) 
-	(if (plusp (vx char)) 
-	    (image-r char)
-	    (image-l char))))
 
 (defun search-player (enemy game)
   (setf (find-player enemy)
@@ -123,6 +124,8 @@
 
 (define-class kuribo-bullet (enemy-bullet)
   (image (get-image :ebul))
+  (image-l (get-image :ebul))
+  (image-r (get-image :ebul))
   (atk 20))
 
 (defmethod update-object ((e kuribo-tullet) game)
@@ -215,6 +218,8 @@
 
 (define-class fas-bullet (enemy-bullet)
   (image (get-image :ebul))
+  (image-l (get-image :ebul))
+  (image-r (get-image :ebul))
   (atk 10))
 
 (defun shot-to-player (enem bullet game)
@@ -262,10 +267,12 @@
 
 (define-class tullet-bullet (enemy-bullet)
   (image (get-image :ebul))
+  (image-l (get-image :ebul))
+  (image-r (get-image :ebul))
   (vx -2)
   (atk 10))
 
-(define-class tullet (land-enemy)
+(define-class tullet (tullet-enemy)
   (image (get-image :enemy2-l))
   (atk 20)
   (bullet-speed-x -3)
@@ -290,31 +297,31 @@
     (push-game-object ebul game)))
 
 
-(defmethod knock-back ((obj gameobject) (e tullet)))
-
-
 ;;demon-gate
 
-(define-class demon-gate (land-enemy)
+(define-class demon-gate (tullet-enemy)
   (image (get-image :enemy-l))
   (hp 400)
   (atk 20)
-  (summon-routine 450)
-  (summon-time 450))
+  (summoned-list nil)
+  (max-summon 5)
+  (summon-routine 300)
+  (summon-time 300))
 
 (defmethod update-object ((e demon-gate) game)
   (call-next-method)
+  (setf (summoned-list e)
+	(remove-if-not #'alive (summoned-list e)))
   (if (plusp (summon-routine e))
       (decf (summon-routine e))
-      (let ((minion (make-instance 'kuribo
-			      :x (get-x e) :y(get-y e)
-			      :vx -1.4 :vy -10)))
-	(push-game-object minion game)
+      (progn
+	(when (< (length (summoned-list e)) (max-summon e))
+	  (let ((minion (make-instance 'kuribo
+				       :x (get-x e) :y(get-y e)
+				       :vx -1.4 :vy -10)))
+	    (push-game-object minion game)
+	    (push minion (summoned-list e))))
 	(setf (summon-routine e) (summon-time e)))))
-
-
-(defmethod knock-back ((char gamecharacter) (e demon-gate)))
-
 
 ;; snipe-tullet
 (define-class snipe-tullet (tullet)
