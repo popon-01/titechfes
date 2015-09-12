@@ -26,7 +26,8 @@
 	(case (state game)
 	  (:title #'title-state)
 	  (:game #'gaming-state)
-	  (:over #'gameover-state))))
+	  (:over #'gameover-state)
+	  (:stage-clear #'stage-clear-state))))
 
 (defun change-state (sym game)
   (setf (state game) sym)

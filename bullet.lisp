@@ -137,7 +137,8 @@
 (define-class bomb-exp (bullet)
   (image (get-image :explosion))
   (atk 50)
-  (life 10))
+  (life 30)
+  (penetrate t))
 
 (defmethod update-object ((bul bomb-exp) game)
   (call-next-method)

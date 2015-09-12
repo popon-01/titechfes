@@ -117,3 +117,14 @@
 			     (x-center game -60)
 			     (y-center game (nth cursor
 						 '(50 70))))))
+
+(defun stage-clear-state (game)
+  (with-slots (jump) (keystate game)
+    (when (key-down-p jump)
+      (change-state :title game)))
+  (sdl:draw-string-solid-* "CLEARED"
+			   (x-center game -40)
+			   (y-center game))
+  (sdl:draw-string-solid-* "Press C key to back title"
+			   (x-center game -120)
+			   (y-center game 30)))

@@ -46,3 +46,9 @@
 (define-class dash-up (item))
 (defmethod item-effect ((item dash-up) (player player) game)
   (incf (max-dash player)))
+
+(define-class clear-item (item))
+(defmethod item-effect ((item clear-item) (player player) game)
+  (update-all game)
+  (sdl:update-display)
+  (change-state :stage-clear game))

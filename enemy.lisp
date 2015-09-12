@@ -28,8 +28,9 @@
 
 (defmethod update-object  ((enem enemy) game)
   (call-next-method)
-  (setf (dx enem) (vx enem) 
-	(dy enem) (vy enem)))
+  (setf (dx enem) (+ (vx enem) (rvx enem)) 
+	(dy enem) (+ (vy enem) (rvy enem))
+	(rvx enem) 0 (rvy enem) 0))
 
 (defmethod knock-back ((obj gameobject) (e land-enemy))
   (setf (vx e) (pmif (plusp (- (get-x e) (get-x obj)))

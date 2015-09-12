@@ -49,7 +49,7 @@
 	(cond ((eq dir :y) (adjust-dy chr chip))
 	      ((eq dir :x) (adjust-dx chr chip)))))))
 
-(defcollide (chr player) (chip move-wall)
+(defcollide (chr gamecharacter) (chip move-wall)
   (call-next-method)
   (when (and (rect-collide= chr chip)
 	     (< (abs (- (get-x chip) (get-x chr)))
@@ -84,11 +84,14 @@
 (defcollide (wall break-wall) (bullet penetrate)
   (when (rect-collide wall bullet)
     (attack bullet wall)))
+
+#|
 (defcollide (wall break-wall) (bomb bomb)
   (call-next-method)
   (when (and (rect-collide wall bomb)
 	     (string= (state bomb) "explosion"))
     (attack bomb wall)))
+|#
 
 (defcollide (wall easy-break-wall) (player player)
   (call-next-method)
@@ -108,7 +111,8 @@
 
 ;;bullet-behavior
 (defcollide (bul bullet) (chip wall)
-  (when (rect-collide bul chip) (kill bul)))
+  (when (rect-collide bul chip) 
+    (setf (alive bul) (penetrate bul))))
 
 (defcollide (enem enemy) (bul bullet)
   (when (rect-collide enem bul)
@@ -154,6 +158,6 @@
     (setf (shot-cool ply) (cool-time bul))))
 
 (defcollide (item item) (p player)
-  (when (rect-collide item p) 
-    (item-effect item p game)
-    (kill item)))
+  (when (rect-collide item p)
+    (kill item)
+    (item-effect item p game)))

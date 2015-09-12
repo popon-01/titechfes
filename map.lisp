@@ -68,7 +68,8 @@
    ("r" recovery-item)
    ("c" score-item)
    ("s" jump-up)
-   ("z" dash-up)))
+   ("z" dash-up)
+   ("O" clear-item)))
 
 
 (defmethod push-game-object ((obj null) game))
