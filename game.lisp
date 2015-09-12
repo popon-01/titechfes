@@ -39,3 +39,9 @@
 		  (get-x obj))) 640)
        (< (abs (- (get-y (player game))
 		  (get-y obj))) 480)))
+
+(defun in-camera-p (obj game)
+  (and (<= -32 (x-in-camera (get-x obj) game) 
+	   (+ 32 (first (window-size game))))
+       (<= -32 (y-in-camera (get-y obj) game)
+	   (+ 32 (second (window-size game))))))
