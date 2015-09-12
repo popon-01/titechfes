@@ -46,3 +46,4 @@
 (define-class dash-up (item))
 (defmethod item-effect ((item dash-up) (player player) game)
   (incf (max-dash player)))
+

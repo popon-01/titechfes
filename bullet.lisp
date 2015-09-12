@@ -6,7 +6,7 @@
   (atk 20)
   (penetrate nil)
   (cool-time 0)
-  (knock-back-atk 10))
+  (knock-back-atk 5))
 
 
 ;---template---
@@ -36,7 +36,7 @@
   (life 30)
   (atk 20)
   (cool-time 15)
-  (knock-back-atk 0.3))
+  (knock-back-atk 0.8))
 
 (defmethod update-object ((bul knife) game)
   (call-next-method)
@@ -50,8 +50,8 @@
 (define-class axe (bullet)
   (image (get-image :axe))
   (ani-frame 3)
-  (atk 50)
-  (cool-time 15)
+  (atk 30)
+  (cool-time 30)
   (vx 1)
   (vy -20))
 
@@ -151,36 +151,53 @@
   (ani-frame 3)
   (atk 20)
   (life 30)
-  (cool-time 10)
+  (cool-time 0)
   (vx 15)
   (penetrate t)
   (back-velocity 20)
-  (state "go")
+  (state :go)
   (stay-count 30))
 
 (defmethod update-object ((bul boomerang) game)
   (call-next-method)
-  (cond ((equal (state bul) "go")
-	 (if (plusp (vx bul))
-	     (decf (vx bul))
-	     (incf (vx bul)))
-	 (when (zerop (vx bul))
-	   (setf (state bul) "stay")))
-	((equal (state bul) "stay")
-	 (if (zerop (stay-count bul))
-	     (setf (state bul) "back")
-	     (decf (stay-count bul))))
-	((equal (state bul) "back")
-	 (let ((dx (- (get-x (player game)) (get-x bul)))
-	       (dy (- (get-y (player game)) (get-y bul))))
-	   (if (and (zerop dx) (zerop dy))
-	       (setf (vx bul) 0
-		     (vy bul) 0)
-	       (setf (vx bul) (truncate (* (back-velocity bul) dx)
-					(sqrt (+ (* dx dx) (* dy dy))))
-		     (vy bul) (truncate (* (back-velocity bul) dy)
-					(sqrt (+ (* dx dx) (* dy dy))))))))))
+  (case (state bul)
+    (:go
+     (if (plusp (vx bul))
+	 (decf (vx bul))
+	 (incf (vx bul)))
+     (when (zerop (vx bul))
+       (setf (state bul) :stay)))
+    (:stay
+     (if (zerop (stay-count bul))
+	 (setf (state bul) :back)
+	 (decf (stay-count bul))))
+    (:back
+     (let ((dx (- (get-x (player game)) (get-x bul)))
+	   (dy (- (get-y (player game)) (get-y bul))))
+       (if (and (zerop dx) (zerop dy))
+	   (setf (vx bul) 0
+		 (vy bul) 0)
+	   (setf (vx bul) (truncate (* (back-velocity bul) dx)
+				    (sqrt (+ (* dx dx) (* dy dy))))
+		 (vy bul) (truncate (* (back-velocity bul) dy)
+				    (sqrt (+ (* dx dx) (* dy dy))))))))))
+
+(let ((boomerang-exist-p nil))
+  (defun boomerang-exist-p () boomerang-exist-p)
+  (defun born-boomerang () (setf boomerang-exist-p t))
+  (defun return-boomerang () (setf boomerang-exist-p nil)))
 
 (defun shot-boomerang (ply game)
-  (shoot boomerang ply game)
-  (setf (shot-cool ply) 100000))
+  (unless (boomerang-exist-p)
+    (shoot boomerang ply game)
+    (born-boomerang)))
+
+
+
+
+
+
+
+
+
+

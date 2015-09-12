@@ -189,8 +189,11 @@
   (setf (y-theta enem) (mod (y-theta enem) 360))
   (incf (vx enem) (if (< (get-x enem) (get-x (player game))) 0.2 -0.2))
   (when (not (muteki enem))
-    (setf (vy enem) (* pi (cos (rad (y-theta enem)))))
-    (setf (vx enem) (clamp (vx enem) -5 5))))
+    (setf (vy enem) (+ (* pi (cos (rad (y-theta enem))))
+		       (* 0.005  (- (get-y (player game))
+				    (get-y enem)
+				    100)))
+	  (vx enem) (clamp (vx enem) -5 5))))
 
 
 
@@ -264,6 +267,8 @@
 (define-class tullet (land-enemy)
   (image (get-image :enemy2-l))
   (atk 20)
+  (bullet-speed-x -3)
+  (bullet-speed-y 0)
   (shot-routine 100))
 
 (defmethod update-object ((enem tullet) game)
@@ -278,11 +283,13 @@
     (setf (get-x ebul) (- (get-x enem)
 			  (truncate (width enem) 2)
 			  (truncate (width ebul) 2))
-	  (get-y ebul) (get-y enem))
+	  (get-y ebul) (get-y enem)
+	  (vx ebul) (bullet-speed-x enem)
+	  (vy ebul) (bullet-speed-y enem))
     (push-game-object ebul game)))
 
 
-(defmethod knock-back ((char gamecharacter) (e tullet)))
+(defmethod knock-back ((obj gameobject) (e tullet)))
 
 
 ;;demon-gate
