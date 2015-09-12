@@ -68,11 +68,11 @@
 (defcollide (ply player) (ebul enemy-bullet)
   (when (rect-collide ply ebul)
     (attack ebul ply)
-    (kill ebul)))
+    (kill ebul game)))
 
 (defcollide (e enemy) (ebul enemy-bullet)
   (when (rect-collide e ebul)
-    (kill ebul)))
+    (kill ebul game)))
 
 (defcollide (wall damage-wall) (player player)
   (call-next-method)
@@ -102,7 +102,7 @@
 
 ;;enemy-bullet-behavior
 (defcollide (ebul enemy-bullet) (chip wall)
-  (when (rect-collide ebul chip) (kill ebul)))
+  (when (rect-collide ebul chip) (kill ebul game)))
 
 ;;bullet-behavior
 (defcollide (bul bullet) (chip wall)
@@ -121,14 +121,14 @@
     (push-game-object (make-instance 'bomb-exp
 				     :x (get-x bul) :y (get-y bul))
 		      game)
-    (kill bul)))
+    (kill bul game)))
 
 (defcollide (enem enemy) (bul bomb)
   (when (rect-collide enem bul)
     (push-game-object (make-instance 'bomb-exp
 				     :x (get-x bul) :y (get-y bul))
 		      game)
-    (kill bul)))
+    (kill bul game)))
 
 (defcollide (bul axe) (chip wall)
   (call-next-method)
@@ -149,10 +149,10 @@
 (defcollide (bul boomerang) (ply player)
   (when (and (rect-collide bul ply)
 	     (equal (state bul) :back))
-    (kill bul)
+    (kill bul game)
     (return-boomerang)))
 
 (defcollide (item item) (p player)
   (when (rect-collide item p)
     (item-effect item p game)
-    (kill item)))
+    (kill item game)))

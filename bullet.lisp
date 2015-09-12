@@ -6,7 +6,7 @@
   (atk 20)
   (penetrate nil)
   (cool-time 0)
-  (knock-back-atk 5))
+  (knock-back-atk 3))
 
 
 ;---template---
@@ -41,7 +41,7 @@
 (defmethod update-object ((bul knife) game)
   (call-next-method)
   (decf (life bul))
-  (when (zerop (life bul)) (kill bul)))
+  (when (zerop (life bul)) (kill bul game)))
 
 (defun shot-knife (ply game)
   (shoot knife ply game))
@@ -75,7 +75,7 @@
 (defmethod update-object ((bul two-way) game)
   (call-next-method)
   (decf (life bul))
-  (when (zerop (life bul)) (kill bul)))
+  (when (zerop (life bul)) (kill bul game)))
 
 (defun shot-two-way (ply game)
   (shoot two-way ply game :vy -1)
@@ -93,7 +93,7 @@
 (defmethod update-object ((bul penetrate) game)
   (call-next-method)
   (decf (life bul))
-  (when (zerop (life bul)) (kill bul)))
+  (when (zerop (life bul)) (kill bul game)))
 
 (defun shot-penetrate (ply game)
   (shoot penetrate ply game))
@@ -103,16 +103,17 @@
 
 (define-class javelin (bullet)
   (image (get-image :javelin))
-  (atk 50)
+  (atk 40)
   (life 30)
-  (cool-time 50)
+  (cool-time 60)
+  (knock-back-atk 4)
   (vx 14)
   (penetrate t))
 
 (defmethod update-object ((bul javelin) game)
   (call-next-method)
   (decf (life bul))
-  (when (zerop (life bul)) (kill bul)))
+  (when (zerop (life bul)) (kill bul game)))
 
 (defun shot-javelin (ply game)
   (shoot javelin ply game))
@@ -137,13 +138,14 @@
 (define-class bomb-exp (bullet)
   (image (get-image :explosion))
   (atk 50)
+  (knock-back-atk 6)
   (life 30)
   (penetrate t))
 
 (defmethod update-object ((bul bomb-exp) game)
   (call-next-method)
   (decf (life bul))
-  (when (zerop (life bul)) (kill bul)))
+  (when (zerop (life bul)) (kill bul game)))
 
 ;;boomerang
 
@@ -155,9 +157,10 @@
   (cool-time 0)
   (vx 15)
   (penetrate t)
+  (knock-back-atk 2)
   (back-velocity 20)
   (state :go)
-  (stay-count 30))
+  (stay-count 120))
 
 (defmethod update-object ((bul boomerang) game)
   (call-next-method)

@@ -56,9 +56,9 @@
   (incf (get-x obj) (vx obj))
   (incf (get-y obj) (vy obj))
   (when (out-of-map-p obj game)
-    (kill obj)))
+    (kill obj game)))
 
-(defmethod kill ((obj gameobject)) (setf (alive obj) nil))
+(defmethod kill ((obj gameobject) game) (setf (alive obj) nil))
 
 (defmethod out-of-map-p ((obj gameobject) game)
   (let ((border 40))

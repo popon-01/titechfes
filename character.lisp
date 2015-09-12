@@ -12,9 +12,9 @@
   (muteki-count 0)
   (muteki-time 10))
 
-(defmethod alive-detect ((char gamecharacter))
+(defmethod alive-detect ((char gamecharacter) game)
   (when (<= (hp char) 0)
-    (kill char)))
+    (kill char game)))
 
 (defmethod dec-muteki-frame ((chr gamecharacter))
   (if (and (muteki chr) (zerop  (muteki-count chr)))
@@ -23,11 +23,11 @@
 
 (defmethod update-object ((chr gamecharacter) game)
   (dec-muteki-frame chr)
-  (alive-detect chr)
+  (alive-detect chr game)
   (incf (get-x chr) (dx chr))
   (incf (get-y chr) (dy chr))
   (when (out-of-map-p chr game)
-    (kill chr)))
+    (kill chr game)))
 
 (defmethod attack ((obj gameobject) (char gamecharacter))
   (when (not (muteki char))
