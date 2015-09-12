@@ -45,9 +45,9 @@
     (let ((nowcell (mod (truncate ani-time ani-frame) cell-num))) 
       (sdl:draw-surface-at-* image
 			     (- (round (x-in-camera x game)) 
-				(/ width 2))
+				(truncate width 2))
 			     (- (round (y-in-camera y game)) 
-				(/ height 2))
+				(truncate height 2))
 			     :cell nowcell)
       (setf (ani-time obj) 
 	    (mod (1+ ani-time) (* cell-num ani-frame))))))

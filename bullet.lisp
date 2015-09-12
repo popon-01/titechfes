@@ -150,7 +150,7 @@
 (define-class boomerang (bullet)
   (image (get-image :boomerang))
   (ani-frame 3)
-  (atk 20)
+  (atk 5)
   (life 30)
   (cool-time 0)
   (vx 15)

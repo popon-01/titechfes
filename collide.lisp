@@ -1,6 +1,9 @@
 (in-package titechfes)
 
 (defun try-move (obj1 obj2 &key (dx1 0) (dy1 0) (dx2 0) (dy2 0))
+  (declare (type gameobject obj1 obj2)
+	   (type number dx1 dy1 dx2 dy2))
+  (the symbol
   (not (and (< (- (+ (get-x obj1) dx1) (/ (width obj1) 2))
 	       (+ (+ (get-x obj2) dx2) (/ (width obj2) 2)))
 	    (< (- (+ (get-x obj2) dx2) (/ (width obj2) 2))
@@ -8,7 +11,7 @@
 	    (< (- (+ (get-y obj1) dy1) (/ (height obj1) 2))
 	       (+ (+ (get-y obj2) dy2) (/ (height obj2) 2)))
 	    (< (- (+ (get-y obj2) dy2) (/ (height obj2) 2))
-	       (+ (+ (get-y obj1) dy1) (/ (height obj1) 2))))))
+	       (+ (+ (get-y obj1) dy1) (/ (height obj1) 2)))))))
 
 (defun adjust-dx (move-obj obj2)
   (setf (dx move-obj) 
@@ -151,5 +154,5 @@
 
 (defcollide (item item) (p player)
   (when (rect-collide item p)
-    (kill item)
-    (item-effect item p game)))
+    (item-effect item p game)
+    (kill item)))
