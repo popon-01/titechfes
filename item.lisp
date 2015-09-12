@@ -52,3 +52,4 @@
   (update-all game)
   (sdl:update-display)
   (change-state :stage-clear game))
+

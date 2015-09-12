@@ -85,14 +85,6 @@
   (when (rect-collide wall bullet)
     (attack bullet wall)))
 
-#|
-(defcollide (wall break-wall) (bomb bomb)
-  (call-next-method)
-  (when (and (rect-collide wall bomb)
-	     (string= (state bomb) "explosion"))
-    (attack bomb wall)))
-|#
-
 (defcollide (wall easy-break-wall) (player player)
   (call-next-method)
   (when (and (rect-collide= wall player)
@@ -148,14 +140,14 @@
 
 (defcollide (bul boomerang) (chip wall)
   (when (and (rect-collide bul chip) 
-	     (equal (state bul) "go"))
-    (setf (state bul) "back")))
+	     (equal (state bul) :go))
+    (setf (state bul) :back)))
 
 (defcollide (bul boomerang) (ply player)
   (when (and (rect-collide bul ply)
-	     (equal (state bul) "back"))
+	     (equal (state bul) :back))
     (kill bul)
-    (setf (shot-cool ply) (cool-time bul))))
+    (return-boomerang)))
 
 (defcollide (item item) (p player)
   (when (rect-collide item p)
