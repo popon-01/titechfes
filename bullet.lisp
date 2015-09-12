@@ -216,14 +216,3 @@
     (shoot boomerang ply game)
     (born-boomerang)))
 
-
-
-
-
-
-
-
-
-
-
-
