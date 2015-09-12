@@ -155,9 +155,9 @@
 		      (- (get-y bul))))))
 
 (defcollide (bul boomerang) (chip wall)
-  (when (and (rect-collide bul chip) 
+  (when (and (rect-collide bul chip)
 	     (equal (state bul) :go))
-    (setf (state bul) :back)))
+    (setf (state bul) :stay)))
 
 (defcollide (bul boomerang) (ply player)
   (when (and (rect-collide bul ply)

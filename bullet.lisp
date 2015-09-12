@@ -122,7 +122,7 @@
   (cool-time 60)
   (knock-back-atk 4)
   (vx 14)
-  (penetrate t))
+  (penetrate nil))
 
 (defmethod update-object ((bul javelin) game)
   (call-next-method)
@@ -215,6 +215,8 @@
   (unless (boomerang-exist-p)
     (shoot boomerang ply game)
     (born-boomerang)))
+
+
 
 
 

@@ -335,7 +335,7 @@
 ;;demon-gate
 
 (define-class demon-gate (tullet-enemy)
-  (image (get-image :enemy-l))
+  (image (get-image :demon-gate))
   (hp 400)
   (atk 20)
   (summon-timer (charge-timer 180))
