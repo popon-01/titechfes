@@ -184,6 +184,8 @@
 
 (defmethod update-object ((bul boomerang) game)
   (call-next-method)
+  (unless (in-camera-p bul game)
+    (kill bul game))
   (case (state bul)
     (:go
      (if (plusp (vx bul))
@@ -205,6 +207,10 @@
 				    (sqrt (+ (* dx dx) (* dy dy))))
 		 (vy bul) (truncate (* (back-velocity bul) dy)
 				    (sqrt (+ (* dx dx) (* dy dy))))))))))
+
+(defmethod kill ((bul boomerang) game)
+  (return-boomerang)
+  (call-next-method))
 
 (let ((boomerang-exist-p nil))
   (defun boomerang-exist-p () boomerang-exist-p)

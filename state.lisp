@@ -40,7 +40,7 @@
 			    (< (abs (- (get-y obj1)
 				       (get-y obj2))) 100))
 		   (collide obj1 obj2 game)))
-	       (update-object-list game))
+	       (collide-object-list game))
   (update-camera game)
   (when (not (alive (player game)))
     (setf (all-object game) 

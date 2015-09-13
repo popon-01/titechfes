@@ -7,6 +7,7 @@
   (player nil)
   (all-object nil)
   (update-object-list nil)
+  (collide-object-list nil)
   (mapchips nil)
   (enemies nil)
   (enemy-bullets nil)
@@ -34,11 +35,17 @@
   (setf (state game) sym)
   (update-state game))
 
-(defun near-player-p (obj game)
+(defun more-near-player-p (obj game)
   (and (< (abs (- (get-x (player game))
 		  (get-x obj))) 640)
        (< (abs (- (get-y (player game))
 		  (get-y obj))) 480)))
+
+(defun near-player-p (obj game)
+  (and (< (abs (- (get-x (player game))
+		  (get-x obj))) 700)
+       (< (abs (- (get-y (player game))
+		  (get-y obj))) 540)))
 
 (defun in-camera-p (obj game)
   (and (<= -32 (x-in-camera (get-x obj) game) 
