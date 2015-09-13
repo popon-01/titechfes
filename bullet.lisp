@@ -174,7 +174,8 @@
   (ani-frame 3)
   (atk 5)
   (life 30)
-  (cool-time (make-timer 600))
+  (cool-time 0)
+  (limit-timer (make-timer 600))
   (vx 15)
   (penetrate t)
   (knock-back-atk 2)
@@ -186,7 +187,7 @@
   (call-next-method)
   (unless (in-camera-p bul game)
     (kill bul game))
-  (when (funcall (cool-time bul))
+  (when (funcall (limit-timer bul))
     (kill bul game))
   (case (state bul)
     (:go
