@@ -28,7 +28,8 @@
 	       '(:boomerang-item "boomerang_item.png")
 	       '(:javelin-item "javelin_item.png")
 	       '(:bomb-item "bomb_item.png")
-	       '(:title "title_touka.png"))
+	       '(:title "title_touka.png")
+	       '(:back-pillar "matsumura_hashira002.png"))
   (load-animations '(:boomerang-l "boomerang-l_ani.png"
 		     24 24 96 24)
 		   '(:boomerang-r "boomerang-r_ani.png"
@@ -47,6 +48,7 @@
     (if (sdl:is-valid-ptr fp)
 	fp
 	nil)))
+
 
 ;------------------main------------------
 (defun run ()

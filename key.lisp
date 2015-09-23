@@ -33,7 +33,8 @@
   (up :sdl-key-up)
   (dash :sdl-key-lshift)
   (shot :sdl-key-x)
-  (weapon :sdl-key-z))
+  (weapon :sdl-key-z)
+  (start :sdl-key-return))
 
 (defmacro dbind (a b &body body)
   `(destructuring-bind ,a ,b ,@body))
@@ -135,6 +136,7 @@
   right
   up 
   down 
+  start
   (dash :key dash :joystick (x lt))
   (jump :key jump :joystick a)
   (shot :key shot :joystick (b rt))

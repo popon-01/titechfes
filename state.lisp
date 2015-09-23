@@ -21,6 +21,25 @@
   (sdl:draw-string-solid-* (to-s (score (player game)))
 			   210 30))
 
+(defun draw-background (image-name game)
+  (let* ((image (get-image image-name))
+	 (width (sdl:width image))
+	 (height (sdl:height image))
+	 (window-height (second (window-size game)))
+	 (window-width (first (window-size game)))
+	 (map-height (second (map-size game)))
+	 (map-width (first (map-size game))))
+    (iter (for h from 0
+	       to (+ height map-height) by height)
+	  (iter (for w from 0 to (+ map-width width) 
+		     by width)
+		(let ((cx (round (x-in-camera w game)))
+		      (cy (round (y-in-camera h game))))
+		  (when (and (<= (- width) cx window-width)
+			     (<= (- height) cy window-height))
+		    (sdl:draw-surface-at-* image cx cy)))))))
+  
+
 (defun start-game (stage-name game)
   (setf (bullets game) nil
 	(all-object game) nil
@@ -47,6 +66,7 @@
 	  (delete (player game) (all-object game)))
     (change-state :over game))
   (sdl:clear-display sdl:*black*)
+  (draw-background :back-pillar game)
   (draw-all game)
   (draw-info game))
 
@@ -59,17 +79,13 @@
       (sdl:draw-surface-at-* (get-image :title)
 			     (x-center game dx)
 			     (y-center game (- dy 60))))
-#|
-    (sdl:draw-string-solid-* 
-     "MATSUMURA"
-     (x-center game -60)
-     (y-center game)
-     :color sdl:*green*)
-|#
-    (with-slots (up down jump) (keystate game)
+    (with-slots (up down jump dash shot weapon start) 
+	(keystate game)
       (whens ((key-down-p up) (decf cursor))
 	     ((key-down-p down) (incf cursor))
-	     ((key-down-p jump) (choice-stage game)))
+	     ((some #'key-down-p 
+		    (list jump dash shot weapon start))
+	      (choice-stage game)))
       (setf cursor (mod cursor 3)))
     (sdl:draw-string-solid-* "stage 1" 
 			     (x-center game -60)
@@ -99,10 +115,12 @@
 (let ((cursor 0))
   (defun gameover-state (game)
     (gaming-state game)
-    (with-slots (up down jump) (keystate game)
+    (with-slots (up down jump dash shot weapon start)
+	(keystate game)
       (whens ((key-down-p up) (decf cursor))
 	     ((key-down-p down) (incf cursor))
-	     ((key-down-p jump) 
+	     ((some #'key-down-p 
+		    (list jump dash shot weapon start)) 
 	      (if (zerop cursor)
 		  (progn (start-game (stage game) game)
 			 (change-state :game game))
@@ -124,12 +142,13 @@
 						 '(50 70))))))
 
 (defun stage-clear-state (game)
-  (with-slots (jump) (keystate game)
-    (when (key-down-p jump)
+  (with-slots (jump dash shot weapon start) (keystate game)
+    (when (some #'key-down-p 
+		(list jump dash shot weapon start))
       (change-state :title game)))
   (sdl:draw-string-solid-* "CLEARED"
 			   (x-center game -40)
 			   (y-center game))
-  (sdl:draw-string-solid-* "Press C key to back title"
+  (sdl:draw-string-solid-* "Press key to back title"
 			   (x-center game -120)
 			   (y-center game 30)))
