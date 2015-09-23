@@ -15,7 +15,7 @@
   (stage nil)
   (state :title)
   (statef nil)
-  (keystate (make-instance 'titechfes-key)))
+  (keystate (make-instance 'game-input)))
 
 (defmethod initialize-instance :after ((game game) &key)
   (update-state game))

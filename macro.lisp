@@ -179,3 +179,6 @@
 	(if (plusp (vx obj)) 
 	    (image-r obj)
 	    (image-l obj))))
+
+(defun print-if (test exp)
+  (if test (print exp) exp))
