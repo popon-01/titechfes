@@ -102,7 +102,9 @@
   (bullet-image-load)
   (item-image-load)
   (icon-image-load)
-  (load-images '(:title "title_touka.png")))
+  (load-images '(:title "title_touka.png")
+	       '(:back-pillar "matsumura_hashira002.png")))
+
 
 
 

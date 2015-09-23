@@ -33,26 +33,20 @@
 (defparameter *collide-table* (make-hash-table))
 
 
-#|
-(defmacro defcollide (arg1 arg2 &body body)
-  `(progn
-     (defmethod collide (,arg1 ,arg2 game)
-       ,@body)
-     (defmethod collide (,arg2 ,arg1 game)
-       ,@body)))
-|#
 
 (defmacro defcollide (arg1 arg2 &body body)
-  (let ((method-sym (symbolicate (second arg1) '- 
-				 (second arg2))))
-    `(progn 
-       (setf (gethash ',method-sym *collide-table*) 0)
-       (defmethod collide (,arg1 ,arg2 game)
-	 (incf (gethash ',method-sym *collide-table*))
-	 ,@body)
-       (defmethod collide (,arg2 ,arg1 game)
-	 (incf (gethash ',method-sym *collide-table*))
-	 ,@body))))
+  (if (some (lambda (x) (eq (car body) x)) 
+	    '(:before :after :around))
+      `(progn
+	 (defmethod collide ,(car body) (,arg1 ,arg2 game)
+	   ,@(cdr body))
+	 (defmethod collide ,(car body) (,arg2 ,arg1 game)
+	   ,@(cdr body)))
+      `(progn
+	 (defmethod collide (,arg1 ,arg2 game)
+	   ,@body)
+	 (defmethod collide (,arg2 ,arg1 game)
+	   ,@body))))
 
 
 (defun round-robin (fn lis)
@@ -180,6 +174,5 @@
 	    (image-r obj)
 	    (image-l obj))))
 
-
-(defun nil-zero (test)
-  (if test test 0))
+(defun print-if (test exp)
+  (if test (print exp) exp))
