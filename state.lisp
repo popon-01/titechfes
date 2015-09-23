@@ -46,8 +46,8 @@
 	 (window-width (first (window-size game)))
 	 (map-height (second (map-size game)))
 	 (map-width (first (map-size game))))
-    (iter (for h from 0
-	       to (+ height map-height) by height)
+    (iter (for h from (- map-height height)
+	       downto (- height) by height)
 	  (iter (for w from 0 to (+ map-width width) 
 		     by width)
 		(let ((cx (round (x-in-camera w game)))
