@@ -28,6 +28,7 @@
 
 (defun mapchip-image-load ()
   (load-images '(:wall "wall_g.png")
+	       '(:locked-wall "locked_wall_g.png")
 	       '(:dameged-wall "damaged_wall_g.png")
 	       '(:dameged2-wall "damaged2_wall_g.png")
 	       '(:switch-red-on "switch_r_on.png")
@@ -80,6 +81,7 @@
 
 (defun item-image-load ()
   (load-images '(:coin "coin.png")
+	       '(:key "key.png")
 	       '(:dash-up "dash_up.png")
 	       '(:jump-up "jump_up.png")
 	       '(:goal "goal.png")

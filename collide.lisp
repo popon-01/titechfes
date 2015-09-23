@@ -187,5 +187,10 @@
   (when (not (switch-on-p (color wall) game))
     (call-next-method)))
 
-
+(defcollide (player player) (wall locked-wall)
+  (call-next-method)
+  (when (and (rect-collide= player wall)
+	     (have-key player))
+    (kill wall game)
+    (setf (have-key player) nil)))
 

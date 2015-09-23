@@ -68,3 +68,6 @@
   (sdl:update-display)
   (change-state :stage-clear game))
 
+(define-class stage-key (item) (image (get-image :key)))
+(defmethod item-effect ((item stage-key) (player player) game)
+  (setf (have-key player) t))

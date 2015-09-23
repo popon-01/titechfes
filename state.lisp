@@ -15,6 +15,8 @@
 	(t (get-image :knife-icon))))
 
 (defun draw-info (game)
+  (when (have-key (player game))
+    (sdl:draw-surface-at-* (get-image :key) 140 15))
   (sdl:draw-box-* 180 15 100 10 :color sdl:*red*)
   (sdl:draw-box-* 180 15 (clamp (truncate (* (hp (player game)) 100)
 					  (max-hp (player game)))

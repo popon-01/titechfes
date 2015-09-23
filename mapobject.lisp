@@ -76,6 +76,9 @@
   (max-hp 30)
   (hp 30))
 
+(define-class locked-wall (wall)
+  (image (get-image :locked-wall)))
+
 (define-class switch (gameobject)
   image-off
   image-on

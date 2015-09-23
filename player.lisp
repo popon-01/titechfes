@@ -29,7 +29,8 @@
   (score 0)
   (bullet-list (vector 'knife nil nil))
   (bullet-i 0)
-  (bullet-num 1))
+  (bullet-num 1)
+  (have-key nil))
 
 (defun player-keyevents (ply game)
   (with-slots (vx vy ax ay  velocity 

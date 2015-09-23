@@ -6,7 +6,7 @@
 6 blue-switch
 7 yellow-switch
 8 green-switch
-9
+9 locked-wall
 0
 
 > movewall
@@ -23,7 +23,7 @@ g active-green-wall G inactive-green-wall
 h active-red-wall H inactive-red-wall
 i item
 j javelin
-k knife
+k knife K stage-key
 l kuribo-tullet
 m M demon-gate
 n snipe-tullet
