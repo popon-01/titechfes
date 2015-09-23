@@ -103,14 +103,4 @@
   (item-image-load)
   (icon-image-load)
   (load-images '(:title "title_touka.png")
-	       '(:back-pillar "matsumura_hashira002.png")))
-
-
-
-
-
-
-
-
-
-
+	       '(:back-pillar "matsumura_hashira06.png")))
