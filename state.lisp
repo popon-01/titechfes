@@ -6,6 +6,14 @@
 (defun y-center (game &optional (dy 0))
   (+ (ash (second (window-size game)) -1) dy))
 
+(defun get-icon (bsym)
+  (cond ((eq bsym 'knife) (get-image :knife-icon))
+	((eq bsym 'javelin) (get-image :javelin-icon))
+	((eq bsym 'axe) (get-image :axe-icon))
+	((eq bsym 'bomb) (get-image :bomb-icon))
+	((eq bsym 'boomerang) (get-image :boomerang-icon))
+	(t (get-image :knife-icon))))
+
 (defun draw-info (game)
   (sdl:draw-box-* 180 15 100 10 :color sdl:*red*)
   (sdl:draw-box-* 180 15 (clamp (truncate (* (hp (player game)) 100)
@@ -19,7 +27,14 @@
 			   320 10)
   (sdl:draw-string-solid-* "Score" 160 30)
   (sdl:draw-string-solid-* (to-s (score (player game)))
-			   210 30))
+			   210 30)
+  (dotimes (i 3)
+    (let ((bsym (elt (bullet-list (player game)) i)))
+      (when bsym
+	(sdl:draw-surface-at-* (get-icon bsym)
+			       (+ 400 (* i 30)) 10))))
+  (sdl:draw-rectangle-* (+ 400 (* (bullet-i (player game)) 30)) 10
+			24 24 :color sdl:*yellow*))
 
 (defun start-game (stage-name game)
   (setf (bullets game) nil

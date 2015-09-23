@@ -10,8 +10,8 @@
   (knock-back-atk 3))
 
 (defmethod update-object ((bul bullet) game)
-  (call-next-method)
-  (image-turn bul))
+  (image-turn bul)
+  (call-next-method))
 
 ;---template---
 ;(define-class name (bullet))
@@ -24,6 +24,7 @@
 (defun set-bullet (instance ply game)
   (let ((bul instance))
     (when (not (dir-right ply)) (setf (vx bul) (- (vx bul))))
+    (image-turn bul)
     (setf (get-x bul) 
 	  (funcall (if (dir-right ply) #'+ #'-)
 		   (get-x ply)

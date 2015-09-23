@@ -120,12 +120,12 @@
 ;;bullet-behavior
 (defcollide (bul bullet) (chip wall)
   (when (rect-collide bul chip) 
-    (setf (alive bul) (penetrate bul))))
+    (kill bul game)))
 
 (defcollide (enem enemy) (bul bullet)
   (when (rect-collide enem bul)
     (attack bul enem)
-    (setf (alive bul) (penetrate bul))))
+    (kill bul game)))
 
 (defcollide (bul penetrate) (chip wall))
 
@@ -171,3 +171,21 @@
   (when (rect-collide item p)
     (item-effect item p game)
     (kill item game)))
+
+(defcollide (switch switch) (bul bullet)
+  (when (rect-collide switch bul)
+    (kill bul game)
+    (switch-change (color switch) game)))
+
+(defcollide (obj gameobject) (wall active-wall)
+  :around
+  (when (switch-on-p (color wall) game)
+    (call-next-method)))
+
+(defcollide (obj gameobject) (wall inactive-wall)
+  :around
+  (when (not (switch-on-p (color wall) game))
+    (call-next-method)))
+
+
+

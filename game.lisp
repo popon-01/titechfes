@@ -15,6 +15,7 @@
   (stage nil)
   (state :title)
   (statef nil)
+  (wall-flag '(:red t :blue :t :yellow t :green t))
   (keystate (make-instance 'titechfes-key)))
 
 (defmethod initialize-instance :after ((game game) &key)

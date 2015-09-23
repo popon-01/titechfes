@@ -1,0 +1,41 @@
+1 wall
+2 damage-wall
+3 break-wall
+4 east-break-wall
+5 red-switch
+6 blue-switch
+7 yellow-switch
+8 green-switch
+9
+0
+
+> movewall
+< movewall
++ boomerang
+
+a aomura
+b   B big
+c score-item
+d kuribo
+e bomb
+f flying2
+g active-green-wall G inactive-green-wall
+h active-red-wall H inactive-red-wall
+i item
+j javelin
+k knife
+l kuribo-tullet
+m M demon-gate
+n snipe-tullet
+o fly-and-stop O clear-item
+p player
+q active-blue-wall Q inactive-blue-wall
+r recovery-item
+s jump-up
+t tullet
+u
+v
+w
+x axe
+y active-yellow-wall Y inactive-yellow-wall
+z dash-up 
