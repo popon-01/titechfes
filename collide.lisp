@@ -125,7 +125,7 @@
 (defcollide (enem enemy) (bul bullet)
   (when (rect-collide enem bul)
     (attack bul enem)
-    (kill bul game)))
+    (when (not (penetrate bul)) (kill bul game))))
 
 (defcollide (bul penetrate) (chip wall))
 
