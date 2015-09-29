@@ -22,7 +22,7 @@
 					  (max-hp (player game)))
 				0 100) 10 
 				:color sdl:*green*)
-  (sdl:draw-string-solid-* "hp" 160 10 )
+  (sdl:draw-string-solid-* "HP" 160 10 )
   (sdl:draw-string-solid-* (to-s (hp (player game)))
 			   280 10)
   (sdl:draw-string-solid-* (shot-name (player game))
@@ -83,7 +83,14 @@
 	  (delete (player game) (all-object game)))
     (change-state :over game))
   (sdl:clear-display sdl:*black*)
-  (draw-background :back-4 game)
+  (let* ((back-table '(("stage1" . :back-1)
+		       ("stage2" . :back-2)
+		       ("stage3" . :back-3)))
+	 (back-image (cdr (assoc (stage game) back-table
+				 :test #'string=))))
+    (if back-image
+	(draw-background back-image game)
+	(error "This stage has no back iamge.")))
   (draw-all game)
   (draw-info game))
 
