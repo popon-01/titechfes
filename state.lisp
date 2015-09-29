@@ -83,7 +83,7 @@
 	  (delete (player game) (all-object game)))
     (change-state :over game))
   (sdl:clear-display sdl:*black*)
-  (draw-background :back-pillar game)
+  (draw-background :back-4 game)
   (draw-all game)
   (draw-info game))
 
@@ -116,12 +116,7 @@
     (sdl:draw-string-solid-* "->" 
 			     (x-center game -90)
 			     (y-center game (nth cursor '(30 50 70)))))
-#|    (sdl:draw-string-solid-* 
-     (concatenate 'string "stage " (to-s (1+ cursor)))
-     (x-center game -60)
-     (y-center game 30)
-     :color sdl:*green*))
-|#
+
   (defun choice-stage (game)
     (let* ((name (concatenate 'string "stage" 
 			      (to-s (1+ cursor)))))

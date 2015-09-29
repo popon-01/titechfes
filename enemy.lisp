@@ -150,9 +150,9 @@
   (shot-routine (charge-timer 60)))
 
 (define-class kuribo-bullet (enemy-bullet)
-  (image (get-image :ebul))
-  (image-l (get-image :ebul))
-  (image-r (get-image :ebul))
+  (image (get-image :ebul-l))
+  (image-l (get-image :ebul-l))
+  (image-r (get-image :ebul-r))
   (atk 30))
 
 (defmethod update-object ((e kuribo-tullet) game)
@@ -168,8 +168,8 @@
 			    (clamp (random 1.5) 1 1.5))))
 	      (ebul (make-instance 
 		     'kuribo-bullet
-		     :x (+ (get-x e) (* 4 bul-vx))
-		     :y (+ (get-y e) (* 4 bul-vy))
+		     :x (+ (get-x e) (* 4.5 bul-vx))
+		     :y (+ (get-y e) (* 4.5 bul-vy))
 		     :vx bul-vx
 		     :vy bul-vy)))
 	 (push-game-object ebul game))))
@@ -248,9 +248,9 @@
   (atk 20))
 
 (define-class fas-bullet (enemy-bullet)
-  (image (get-image :ebul))
-  (image-l (get-image :ebul))
-  (image-r (get-image :ebul))
+  (image (get-image :ebul2))
+  (image-l (get-image :ebul2))
+  (image-r (get-image :ebul2))
   (atk 10))
 
 (defun shot-to-player (enem bullet game)
@@ -299,9 +299,9 @@
 ;;tullet
 
 (define-class tullet-bullet (enemy-bullet)
-  (image (get-image :ebul))
-  (image-l (get-image :ebul))
-  (image-r (get-image :ebul))
+  (image (get-image :ebul2))
+  (image-l (get-image :ebul2))
+  (image-r (get-image :ebul2))
   (vx -2)
   (atk 10))
 

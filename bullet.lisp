@@ -173,7 +173,7 @@
   (image-l (get-image :boomerang-l))
   (image-r (get-image :boomerang-r))
   (ani-frame 3)
-  (atk 5)
+  (atk 25)
   (life 30)
   (cool-time 0)
   (limit-timer (make-timer 600))
@@ -182,7 +182,7 @@
   (knock-back-atk 2)
   (back-velocity 20)
   (state :go)
-  (stay-count 120))
+  (stay-timer (make-timer 120)))
 
 (defmethod update-object ((bul boomerang) game)
   (call-next-method)
@@ -198,9 +198,8 @@
      (when (zerop (vx bul))
        (setf (state bul) :stay)))
     (:stay
-     (if (zerop (stay-count bul))
-	 (setf (state bul) :back)
-	 (decf (stay-count bul))))
+     (when (funcall (stay-timer bul))
+       (setf (state bul) :back)))
     (:back
      (let ((dx (- (get-x (player game)) (get-x bul)))
 	   (dy (- (get-y (player game)) (get-y bul))))

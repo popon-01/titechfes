@@ -15,7 +15,7 @@
   (stage nil)
   (state :title)
   (statef nil)
-  (wall-flag '(:red t :blue t :yellow t :green t))
+  (wall-flag (list :red t :blue t :yellow t :green t))
   (keystate (make-instance 'game-input)))
 
 
