@@ -348,14 +348,19 @@
 (defmethod draw-object ((e demon-gate) game)
   (if (animation-p e) 
       (call-next-method)
-      (with-slots (image x y width height) e
-	(sdl:draw-surface-at-* image
-			       (- (round (x-in-camera x game)) 
-				  (truncate width 2))
-			       (- (round (y-in-camera y game)) 
-				  (truncate height 2))
-			       :cell 0))))
-
+      (with-slots (image x y width height
+			 ani-time cell-num ani-frame) e
+	(when (or (not (muteki e))
+		  (not (zerop (mod (ani-time e) 3))))
+	  (sdl:draw-surface-at-* image
+				 (- (round (x-in-camera x game)) 
+				    (truncate width 2))
+				 (- (round (y-in-camera y game)) 
+				    (truncate height 2))
+				 :cell 0))
+	  (setf ani-time 
+		(mod (1+ ani-time) (* cell-num ani-frame 3))))))
+  
 (defmethod update-object ((e demon-gate) game)
   (call-next-method)
   (with-slots (summon-timer summon-list summon-limit
