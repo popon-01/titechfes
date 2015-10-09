@@ -11,6 +11,8 @@
 
 (defmethod update-object ((bul bullet) game)
   (image-turn bul)
+  (when (out-of-map-p bul game)
+    (kill bul game))
   (call-next-method))
 
 ;---template---
@@ -157,6 +159,7 @@
   (image-l (get-image :explosion))
   (image-r (get-image :explosion))
   (atk 70)
+  (ani-frame 4)
   (knock-back-atk 6)
   (life 30)
   (penetrate t))

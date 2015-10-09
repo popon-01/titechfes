@@ -129,19 +129,30 @@
 
 (defcollide (bul penetrate) (chip wall))
 
+(defcollide (bul bomb-exp) (chip wall))
+(defcollide (bul bomb-exp) (wall break-wall)
+  (when (rect-collide bul wall)
+    (attack bul wall)))
+(defcollide (bul bomb-exp) (chip switch))
+
+(defun make-bomb-exp (bul game)
+  (push-game-object (make-instance 'bomb-exp
+				   :x (get-x bul) :y (get-y bul))
+		    game)
+  (kill bul game))
+
 (defcollide (bul bomb) (chip wall)
   (when (rect-collide chip bul)
-    (push-game-object (make-instance 'bomb-exp
-				     :x (get-x bul) :y (get-y bul))
-		      game)
-    (kill bul game)))
+    (make-bomb-exp bul game)))
 
 (defcollide (enem enemy) (bul bomb)
   (when (rect-collide enem bul)
-    (push-game-object (make-instance 'bomb-exp
-				     :x (get-x bul) :y (get-y bul))
-		      game)
-    (kill bul game)))
+    (make-bomb-exp bul game)))
+
+(defcollide (bul bomb) (switch switch)
+  (when (rect-collide switch bul)
+    (make-bomb-exp bul game)
+    (switch-change (color switch) game)))
 
 (defcollide (bul axe) (chip wall)
   (call-next-method)
@@ -176,6 +187,8 @@
   (when (rect-collide switch bul)
     (kill bul game)
     (switch-change (color switch) game)))
+
+(defcollide (switch switch) (ebul enemy-bullet))
 
 (defcollide (obj gameobject) (wall active-wall)
   :around

@@ -338,22 +338,41 @@
   (image (get-image :demon-gate))
   (hp 250)
   (atk 20)
+  (ani-frame 2)
+  (animation-p nil)
+  (animation-timer (charge-timer 16))
   (summon-timer (charge-timer 300))
   (summon-list nil)
   (summon-limit 5))
 
+(defmethod draw-object ((e demon-gate) game)
+  (if (animation-p e) 
+      (call-next-method)
+      (with-slots (image x y width height) e
+	(sdl:draw-surface-at-* image
+			       (- (round (x-in-camera x game)) 
+				  (truncate width 2))
+			       (- (round (y-in-camera y game)) 
+				  (truncate height 2))
+			       :cell 0))))
+
 (defmethod update-object ((e demon-gate) game)
   (call-next-method)
-  (with-slots (summon-timer summon-list summon-limit) e
+  (with-slots (summon-timer summon-list summon-limit
+			    animation-timer animation-p) e
     (setf summon-list (remove-if-not #'alive summon-list))
     (when (and (< (length summon-list) summon-limit)
 	       (funcall summon-timer :charge)
+	       (setf animation-p t)
+	       (funcall animation-timer :charge)
+	       (funcall animation-timer :shot)
 	       (funcall summon-timer :shot))
       (let ((minion (make-instance 'kuribo
 				   :x (get-x e) :y(get-y e)
 				   :vx -1.4 :vy -10)))
 	(push-game-object minion game)
-	(push minion summon-list)))))
+	(push minion summon-list)
+	(setf animation-p nil)))))
 
 
 ;; snipe-tullet
@@ -409,7 +428,7 @@
   (armer nil)
   (knock-back-timer (make-timer 15))
   (state #'big-walk)
-  (item-table  '(dash-up jump-up)))
+  (item-table  '(stage-key)))
 
 (defmethod knock-back ((obj gameobject) (b big))
   (setf (find-player b) t)

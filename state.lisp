@@ -14,29 +14,62 @@
 	((eq bsym 'boomerang) (get-image :boomerang-icon))
 	(t (get-image :knife-icon))))
 
-(defun draw-info (game)
-  (when (have-key (player game))
-    (sdl:draw-surface-at-* (get-image :key) 140 15))
-  (sdl:draw-box-* 180 15 100 10 :color sdl:*red*)
-  (sdl:draw-box-* 180 15 (clamp (truncate (* (hp (player game)) 100)
+(defun draw-hp-info (game)
+  (sdl:draw-box-* 170 15 100 10 :color sdl:*red*)
+  (sdl:draw-box-* 170 15 (clamp (truncate (* (hp (player game)) 100)
 					  (max-hp (player game)))
 				0 100) 10 
 				:color sdl:*green*)
-  (sdl:draw-string-solid-* "hp" 160 10 )
+  (sdl:draw-string-solid-* "HP" 150 10 )
   (sdl:draw-string-solid-* (to-s (hp (player game)))
-			   280 10)
+			   270 10))
+
+(defun draw-weapon-info (game)
   (sdl:draw-string-solid-* (shot-name (player game))
-			   320 10)
-  (sdl:draw-string-solid-* "Score" 160 30)
-  (sdl:draw-string-solid-* (to-s (score (player game)))
-			   210 30)
+			   300 10)
   (dotimes (i 3)
     (let ((bsym (elt (bullet-list (player game)) i)))
       (when bsym
 	(sdl:draw-surface-at-* (get-icon bsym)
-			       (+ 400 (* i 30)) 10))))
-  (sdl:draw-rectangle-* (+ 400 (* (bullet-i (player game)) 30)) 10
+			       (+ 390 (* i 30)) 0))))
+  (sdl:draw-rectangle-* (+ 390 (* (bullet-i (player game)) 30)) 0
 			24 24 :color sdl:*yellow*))
+
+(defun draw-score-info (game)
+  (sdl:draw-string-solid-* "Score" 500 0)
+  (let ((score-str (to-s (score (player game)))))
+    (sdl:draw-string-solid-* score-str
+			     (- 640 (* (length score-str) 10))
+			     0)))
+
+(defun draw-jump-info (game)
+  (with-slots (max-jump jump-count) (player game)
+    (sdl:draw-string-solid-* "Jump" 150 25)
+    (dotimes (i max-jump)
+      (let ((base (if (> (1+ i) jump-count) 50 0)))
+	(sdl:draw-filled-circle-* (+ 195 (* i 10)) 33 5 
+				  :color (sdl:color :r (- 255 base) 
+						    :g (- 165 base)
+						    :b (- 50 base)))))))
+
+(defun draw-dash-info (game)
+  (with-slots (max-dash dash-count) (player game)
+    (sdl:draw-string-solid-* "Dash" 150 40)
+    (dotimes (i max-dash)
+      (let ((base (if (> (1+ i) dash-count) 50 0)))
+	(sdl:draw-filled-circle-* (+ 195 (* i 10)) 48 5 
+				  :color (sdl:color :r (- 50 base) 
+						    :g (- 144 base)
+						    :b (- 255 base)))))))
+
+(defun draw-info (game)
+  (when (have-key (player game))
+    (sdl:draw-surface-at-* (get-image :key) 130 20))
+  (draw-hp-info game)
+  (draw-weapon-info game)
+  (draw-score-info game)
+  (draw-jump-info game)
+  (draw-dash-info game))
 
 (defun draw-background (image-name game)
   (let* ((image (get-image image-name))

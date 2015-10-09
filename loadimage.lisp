@@ -66,7 +66,6 @@
 	       '(:knife-r "knife2-r.png")
 	       '(:javelin-l "javelin-l.png")
 	       '(:javelin-r "javelin-r.png")
-	       '(:explosion "explosion.png")
 	       '(:ebul-l "ebul_l.png")
 	       '(:ebul-r "ebul_r.png")
 	       '(:ebul2 "ebul2.png"))
@@ -81,7 +80,9 @@
 		   '(:bomb-l "bomb-l_ani.png"
 		     24 24 96 24)
 		   '(:bomb-r "bomb-r_ani.png"
-		     24 24 96 24)))
+		     24 24 96 24)
+		   '(:explosion "explosion2.png"
+		     32 32 128 64)))
 
 (defun item-image-load ()
   (load-images ; '(:coin "coin.png")
